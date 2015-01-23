@@ -2,10 +2,6 @@
 //#define pixelPlot;
 #include <iostream>
 #include <cmath>
-int roundOff(float a)
-{
-    return (a+0.5);
-}
 void setpixel(SDL_Surface* screen, int x,int y,int r, int g,int b)
 {
     int *pixmem32;

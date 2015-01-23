@@ -6,11 +6,12 @@ const int SCREEN_HEIGHT = 700;
 
 vertex transformTo2D(vertex threeD)
 {
-	vertex vanishing(0,0,300), view(0,0,100);
+	vertex vanishing(0,0,1200), view(0,0,300);
 	vertex res;
 	float h = (view.z - threeD.z)/(vanishing.z - threeD.z);
 	res.x = threeD.x*h;
 	res.y = threeD.y*h;
+	res.z = threeD.z;
 	return res;
 }
 
@@ -23,89 +24,95 @@ vertex rotation3D(vertex v, float theta = 1)
 	return res;
 }
 
+vertex scaling3D(vertex v, float scaleFactor = 1){
+	vertex res;
+	res.x = roundOff(v.x*scaleFactor);
+	res.y = roundOff(v.y*scaleFactor);
+	res.z = roundOff(v.z*scaleFactor);
+	return res;
+}
+vertex scaling3D(vertex init, vertex pivot, float scalingFactor){
+	vertex res;
+	res.x = roundOff(init.x * scalingFactor + pivot.x * (1 - scalingFactor));
+	res.y = roundOff(init.y * scalingFactor + pivot.y * (1 - scalingFactor));
+	res.z = roundOff(init.z * scalingFactor + pivot.z * (1 - scalingFactor));
+	return res;
+}
+
 int main(int argc, char const *argv[])
 {
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_WM_SetCaption("Perspective", NULL);
 	SDL_Surface* screen = NULL;
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_RESIZABLE);
-
-	vertex a(600,600,10), b(600,700,10), c(700,700,10), d(700,600,10);
-	vertex e(600,600,30), f(600,700,30), g(700,700,30), h(700,600,30);
-	vertex aT(150,150,150), bT(250,150,150), cT(150,150,0), dT(150,50,75);
-	
-	a = transformTo2D(a); b = transformTo2D(b);
-	c = transformTo2D(c); d = transformTo2D(d);
-	e = transformTo2D(e); f = transformTo2D(f);
-	g = transformTo2D(g); h = transformTo2D(h);
-	
+	vertex aT(10,500,0), bT(-500,500,50), cT(500,500,100), dT(10,-150,50);
+	float theta, scaleFactor;
 	aT = transformTo2D(aT); bT = transformTo2D(bT);
 	cT = transformTo2D(cT); dT = transformTo2D(dT);
-
-	drawLineDDA(screen,aT,bT,255,255,255);
-    drawLineDDA(screen,bT,cT,255,255,255);
-    drawLineDDA(screen,cT,aT,255,255,255);
-    drawLineDDA(screen,dT,aT,255,255,255);
-	drawLineDDA(screen,dT,bT,255,255,255);
-    drawLineDDA(screen,dT,cT,255,255,255);
-
-	drawLineDDA(screen,a,b,255,0,0);
-    drawLineDDA(screen,b,c,0,255,0);
-    drawLineDDA(screen,c,d,0,0,255);
-    drawLineDDA(screen,d,a,255,255,255);
-	drawLineDDA(screen,e,f,255,0,0);
-    drawLineDDA(screen,f,g,0,255,0);
-    drawLineDDA(screen,g,h,0,0,255);
-    drawLineDDA(screen,h,e,255,255,255);
-    drawLineDDA(screen,a,e,255,0,0);
-    drawLineDDA(screen,b,f,0,255,0);
-    drawLineDDA(screen,c,g,0,0,255);
-    drawLineDDA(screen,d,h,255,255,255);
-	int count = 0;/*
-	while(count<360){
-		SDL_Surface* screen = NULL;
-	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_RESIZABLE);
-		
-		a = rotation3D(a); b = rotation3D(b);
-		c = rotation3D(c); d = rotation3D(d);
-		e = rotation3D(e); f = rotation3D(f);
-		g = rotation3D(g); h = rotation3D(h);
-
-		drawLineDDA(screen,a,b,255,0,0);
-	    drawLineDDA(screen,b,c,0,255,0);
-	    drawLineDDA(screen,c,d,0,0,255);
-	    drawLineDDA(screen,d,a,255,255,255);
-		drawLineDDA(screen,e,f,255,0,0);
-	    drawLineDDA(screen,f,g,0,255,0);
-	    drawLineDDA(screen,g,h,0,0,255);
-	    drawLineDDA(screen,h,e,255,255,255);
-	    drawLineDDA(screen,a,e,255,0,0);
-	    drawLineDDA(screen,b,f,0,255,0);
-	    drawLineDDA(screen,c,g,0,0,255);
-	    drawLineDDA(screen,d,h,255,255,255);
-		
-		count++;
-		SDL_FreeSurface(screen);
-	}*/
-	
     SDL_Event event;
-    bool keypress = false;    
-    while (!keypress)
+    bool quit = false; bool pause = false;
+    while (!quit)
     {
+		SDL_Surface* screen = NULL;
+		scaleFactor = 1.0f;
+		vertex pivot((aT.x+bT.x+cT.x+dT.x)/4,(aT.y+bT.y+cT.y+dT.y)/4,(aT.z+bT.z+cT.z+dT.z)/4);
         while(SDL_PollEvent(&event))
         {
             switch(event.type)
             {
-                //If the cross on the top is pressed it is triggered
                 case SDL_QUIT:
-                    keypress = true;
-                break;
-                //Triggered for keydown
+                    quit = true;
+                	break;
                 case SDL_KEYDOWN:
-                    keypress = true;
-                break;
+		        	switch (event.key.keysym.sym)
+		        	{
+		        		case SDLK_ESCAPE:
+		        			quit = true;
+		        			break;
+		        		case SDLK_BACKSPACE:
+		        			quit = true;
+		        			break;
+		        		case SDLK_UP:
+							aT = scaling3D(aT, pivot, 1.1); bT = scaling3D(bT, pivot, 1.1);
+							cT = scaling3D(cT, pivot, 1.1); dT = scaling3D(dT, pivot, 1.1);
+		        			break;
+		        		case SDLK_DOWN:
+							aT = scaling3D(aT, pivot, 0.9); bT = scaling3D(bT, pivot, 0.9);
+							cT = scaling3D(cT, pivot, 0.9); dT = scaling3D(dT, pivot, 0.9);
+		        			break;
+		        		case SDLK_SPACE:
+		        			pause = (pause)?false:true;
+		        			while(pause){
+		        				SDL_Event eventPaused;
+		        				while(SDL_PollEvent(&eventPaused)){
+		        					switch(eventPaused.type){
+						                case SDL_KEYDOWN:
+								        	switch (event.key.keysym.sym)
+								        	{
+								        		case SDLK_SPACE:
+								        			pause = (pause)?false:true;
+								        			break;
+								        	}
+								        	break;
+		        					}
+		        				}
+		        			}
+		        			break;
+		        	}
+	                break;
             }
         }
+		aT = rotation3D(aT, 0.2); bT = rotation3D(bT, 0.2);
+		cT = rotation3D(cT, 0.2); dT = rotation3D(dT, 0.2);
+		screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 32, SDL_RESIZABLE);
+	    drawLineDDA(screen,aT,bT);
+	    drawLineDDA(screen,bT,cT);
+	    drawLineDDA(screen,cT,aT);
+	    drawLineDDA(screen,aT,dT);
+	    drawLineDDA(screen,bT,dT,255,0,0);
+	    drawLineDDA(screen,cT,dT,0,255,0);
+	    SDL_Flip(screen);
+		SDL_FreeSurface(screen);
     }
     SDL_Quit();
     return 0;

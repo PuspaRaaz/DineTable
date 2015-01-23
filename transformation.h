@@ -39,7 +39,7 @@ void setpixel(SDL_Surface* screen, int x,int y,int r, int g,int b)
     *pixmem32 = colour;
 }
 
-void drawLineDDA(SDL_Surface* screen, vertex A, vertex B, int r = 255, int g = 255, int b = 255)
+void drawLineDDA(SDL_Surface* screen, vertex A, vertex B, int r, int g, int b)
 {
     float dx, dy, xInc, yInc;
     int step, k = 0;
@@ -59,7 +59,7 @@ void drawLineDDA(SDL_Surface* screen, vertex A, vertex B, int r = 255, int g = 2
         k++;
     }
     while(k<=step);
-    // SDL_Flip(screen);
+    SDL_Flip(screen);
 }
 
 void translation2D(int x, int y, int tx, int ty, int xN, int yN){
