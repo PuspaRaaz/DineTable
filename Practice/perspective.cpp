@@ -8,7 +8,7 @@ vertex transformTo2D(vertex threeD)
 {
 	vertex vanishing(0,0,1200), view(0,0,300);
 	vertex res;
-	float h = (view.z - threeD.z)/(vanishing.z - threeD.z);
+	float h = (view.z - threeD.z)/(vanishing.z - view.z);
 	res.x = threeD.x*h;
 	res.y = threeD.y*h;
 	res.z = threeD.z;
