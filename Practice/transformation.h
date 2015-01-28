@@ -54,7 +54,7 @@ void drawLineDDA(SDL_Surface* screen, vertex A, vertex B, int r = 255, int g = 2
 
     do
     {
-        setpixel(screen,roundOff(x)+500,roundOff(y)+350,r,g,b);//SDL_Flip(screen);
+        setpixel(screen,roundOff(x),roundOff(y),r,g,b);//SDL_Flip(screen);
         x+= xInc; y+= yInc;
         k++;
     }
