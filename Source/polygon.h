@@ -18,6 +18,10 @@ public:
 	void rotatePolygonX(SDL_Surface*, float);
 	void rotatePolygonY(SDL_Surface*, float);
 	void rotatePolygonZ(SDL_Surface*, float);
+	void scalePolygon(SDL_Surface*, vertex, float);
+	void translatePolygon(SDL_Surface*, int, int, int);
+	Matrix polygonToMatrix();
+	void matrixToPolygon(Matrix);
 	
 };
 
@@ -38,79 +42,50 @@ void polygon::transformTo2D(){
 		point[i].z = point[i].z*h;
 	}
 }
-void polygon::rotatePolygonX(SDL_Surface* window, float theta = 1){
-	theta = theta*3.1415926/180;
-	float s = sin(theta), c = cos(theta);
+Matrix polygon::polygonToMatrix(){
 	Matrix temp(4,vertexCount);
-	Matrix rotation(4,4);
-	// float arr[16] = {c, z, s, z, z, o, z, z, s, z,z,z,z,z,z,o};
-	// rotation.data = arr;
-	rotation.data[0] = 1;rotation.data[1] = 0;
-	rotation.data[2] = 0;rotation.data[3] = 0;
-	rotation.data[4] = 0;rotation.data[5] = c;
-	rotation.data[6] = -s;rotation.data[7] = 0;
-	rotation.data[8] = 0;rotation.data[9] = s;
-	rotation.data[10] = c;rotation.data[11] = 0;
-	rotation.data[12] = 0;rotation.data[13] = 0;
-	rotation.data[14] = 0;rotation.data[15] = 1;
-	
 	for(int i = 0; i < vertexCount; i++){
-		temp.data[0] = point[i].x; temp.data[1] = point[i].y;
-		temp.data[2] = point[i].z; temp.data[3] = 1;
-		temp = rotation * temp;
-		point[i].x = temp.data[0]; point[i].y = temp.data[1];
-		point[i].z = temp.data[2];
+		temp.data[i+0*vertexCount] = point[i].x;
+		temp.data[i+1*vertexCount] = point[i].y;
+		temp.data[i+2*vertexCount] = point[i].z;
+		temp.data[i+3*vertexCount] = 1;
 	}
-	drawPolygon(window);
+	return temp;
+}
+void polygon::matrixToPolygon(Matrix temp){
+	for(int i = 0; i < vertexCount; i++){
+		point[i].x = temp.data[i+0*vertexCount];
+		point[i].y = temp.data[i+1*vertexCount];
+		point[i].z = temp.data[i+2*vertexCount];
+	}
 }
 void polygon::rotatePolygonY(SDL_Surface* window, float theta = 1){
 	theta = theta*3.1415926/180;
 	float s = sin(theta), c = cos(theta);
-	Matrix temp(4,1);
 	Matrix rotation(4,4);
-	// float arr[16] = {c, z, s, z, z, o, z, z, s, z,z,z,z,z,z,o};
-	// rotation.data = arr;
-	rotation.data[0] = c;rotation.data[1] = 0;
-	rotation.data[2] = s;rotation.data[3] = 0;
-	rotation.data[4] = 0;rotation.data[5] = 1;
-	rotation.data[6] = 0;rotation.data[7] = 0;
-	rotation.data[8] = -s;rotation.data[9] = 0;
-	rotation.data[10] = c;rotation.data[11] = 0;
-	rotation.data[12] = 0;rotation.data[13] = 0;
-	rotation.data[14] = 0;rotation.data[15] = 1;
-	
-	for(int i = 0; i < vertexCount; i++){
-		temp.data[0] = point[i].x; temp.data[1] = point[i].y;
-		temp.data[2] = point[i].z; temp.data[3] = 1;
-		temp = rotation * temp;
-		point[i].x = temp.data[0]; point[i].y = temp.data[1];
-		point[i].z = temp.data[2];
-	}
+	float arr[] = {c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, 0, 1};
+	rotation.data = arr;	
+	Matrix temp(this->polygonToMatrix());
+	temp = rotation * temp;
+	this->matrixToPolygon(temp);	
 	drawPolygon(window);
 }
-void polygon::rotatePolygonZ(SDL_Surface* window, float theta = 1){
-	theta = theta*3.1415926/180;
-	float s = sin(theta), c = cos(theta);
-	Matrix temp(4,1);
-	Matrix rotation(4,4);
-	// float arr[16] = {c, z, s, z, z, o, z, z, s, z,z,z,z,z,z,o};
-	// rotation.data = arr;
-	rotation.data[0] = c;rotation.data[1] = -s;
-	rotation.data[2] = 0;rotation.data[3] = 0;
-	rotation.data[4] = s;rotation.data[5] = c;
-	rotation.data[6] = 0;rotation.data[7] = 0;
-	rotation.data[8] = 0;rotation.data[9] = 0;
-	rotation.data[10] = 1;rotation.data[11] = 0;
-	rotation.data[12] = 0;rotation.data[13] = 0;
-	rotation.data[14] = 0;rotation.data[15] = 1;
-	
-	for(int i = 0; i < vertexCount; i++){
-		temp.data[0] = point[i].x; temp.data[1] = point[i].y;
-		temp.data[2] = point[i].z; temp.data[3] = 1;
-		temp = rotation * temp;
-		point[i].x = temp.data[0]; point[i].y = temp.data[1];
-		point[i].z = temp.data[2];
-	}
+void polygon::translatePolygon(SDL_Surface* window, int tx, int ty, int tz){
+	Matrix translate(4,4);
+	float arr[] = {1, 0, 0, tx, 0, 1, 0, ty, 0, 0, 1, tz, 0, 0, 0, 1};
+	translate.data = arr;
+	Matrix temp(this->polygonToMatrix());
+	temp = translate * temp;
+	this->matrixToPolygon(temp);
+	drawPolygon(window);
+}
+void polygon::scalePolygon(SDL_Surface* window, vertex pivot, float s){
+	Matrix scale(4,4);
+	float arr[] = {s, 0, 0, pivot.x*(1 - s), 0, s, 0, pivot.y*(1 - s), 0, 0, s, pivot.z*(1 - s), 0, 0, 0, 1};
+	scale.data = arr;
+	Matrix temp(this->polygonToMatrix());
+	temp = scale * temp;
+	this->matrixToPolygon(temp);
 	drawPolygon(window);
 }
 
