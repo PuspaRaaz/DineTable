@@ -8,20 +8,18 @@ class Matrix
 private:
 	int row, col;
 public:
-	float *data, space;
+	float *data;
 
 	//constructor
 	Matrix(int r, int c):row(r),col(c){
-		space = row * col;
-		data = new float[space];
+		data = new float[row * col];
 	}
 
 	//copy constructor
 	Matrix(const Matrix& mat){
 		row = mat.row;
 		col = mat.col;
-		space = mat.space;
-		data = new float[space];
+		data = new float[row * col];
 		data = mat.data;
 	}
 
