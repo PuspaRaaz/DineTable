@@ -1,5 +1,5 @@
-#ifndef _MATRIX_H
-#define _MATRIX_H
+#ifndef _MATRIX_H_
+#define _MATRIX_H_
 
 #include <iostream>
 
@@ -8,33 +8,43 @@ class Matrix
 private:
 	int row, col;
 public:
-	float* data;
+	float *data, space;
+
+	//constructor
 	Matrix(int r, int c):row(r),col(c){
-		data = new float[row*col];
+		space = row * col;
+		data = new float[space];
 	}
+
+	//copy constructor
 	Matrix(const Matrix& mat){
 		row = mat.row;
 		col = mat.col;
-		data = new float[row*col];
+		space = mat.space;
+		data = new float[space];
 		data = mat.data;
 	}
+
+	//destructor
 	~Matrix(){};
 
-	float& operator() (int r, int c);
-	float& operator() (int pos);
-	Matrix operator+ (Matrix& mat);
-	Matrix operator- (Matrix& mat);
-	Matrix operator* (Matrix& mat);
-	void displayMat();
+	float& operator() (int r, int c); //returns the value of Matrix(r,c)
+	float& operator() (int pos); //returns the value of Matrix(pos) = Matrix.data[pos]
+	Matrix operator+ (Matrix& mat); //returns this + mat
+	Matrix operator- (Matrix& mat); //returns this - mat
+	Matrix operator* (Matrix& mat); //returns this * mat (cross-product)
+	void displayMat(); //display matrix in row*col form
 };
 
 float& Matrix::operator() (int r, int c){
 	int pos = col*r + c;
 	return data[pos];
 }
+
 float& Matrix::operator() (int pos){
 	return data[pos];
 }
+
 Matrix Matrix::operator+ (Matrix& mat){
 	if(row != mat.row && col != mat.col)
 		throw "ERROR";
@@ -47,6 +57,7 @@ Matrix Matrix::operator+ (Matrix& mat){
 	}
 	return res;
 }
+
 Matrix Matrix::operator- (Matrix& mat){
 	if(row != mat.row && col != mat.col)
 		throw "ERROR";
@@ -59,6 +70,7 @@ Matrix Matrix::operator- (Matrix& mat){
 	}
 	return res;
 }
+
 Matrix Matrix::operator* (Matrix& mat){
 	if(col != mat.row)
 		throw "ERROR";
@@ -74,6 +86,7 @@ Matrix Matrix::operator* (Matrix& mat){
 	}
 	return res;
 }
+
 void Matrix::displayMat(){
 	for (int i = 0; i < row; i++){
 		for (int j = 0; j < col; j++){
