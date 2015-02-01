@@ -21,11 +21,12 @@ public:
 	~Color(){}
 	
 };
+
 //predifined colors
-extern Color White(255,255,255);
-extern Color Black(0, 0, 0);
-extern Color Red(255,0,0);
-extern Color Green(0,255,0);
-extern Color Blue(0,0,255);
+extern const Color White(255,255,255);
+extern const Color Black(0, 0, 0);
+extern const Color Red(255,0,0);
+extern const Color Green(0,255,0);
+extern const Color Blue(0,0,255);
 
 #endif

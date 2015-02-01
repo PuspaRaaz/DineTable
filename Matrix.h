@@ -15,14 +15,6 @@ public:
 		data = new float[row * col];
 	}
 
-	//copy constructor
-	Matrix(const Matrix& mat){
-		row = mat.row;
-		col = mat.col;
-		data = new float[row * col];
-		data = mat.data;
-	}
-
 	//destructor
 	~Matrix(){};
 

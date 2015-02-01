@@ -5,14 +5,14 @@
 #include "Vertex.h"
 
 //changes 3D vertex into corresponding plotable 2D vertex
-Vertex2D worldToView(const Vertex3D& source, const Vertex3D& camera,
+Vertex2D worldToView(const Vertex3D& source, const Vertex3D& cam,
 	const Vertex3D& viewPlane, float planeWidht, float planeHeight,
 	int winWidth, int winHeight)
 {
 	Matrix WtoV(4,4);
 	Vertex3D N, U, V(0, 1, 0);
 
-	N = camera - viewPlane;
+	N = cam - viewPlane;
 	N = N / N.magnitude();
 
 	U = V.crossProduct(N);
@@ -22,9 +22,9 @@ Vertex2D worldToView(const Vertex3D& source, const Vertex3D& camera,
 
 	Matrix translate(4,4);
 	float arr[16] = {
-		1, 0, 0, -camera.x,
-		0, 1, 0, -camera.y,
-		0, 0, 1, -camera.z,
+		1, 0, 0, -cam.x,
+		0, 1, 0, -cam.y,
+		0, 0, 1, -cam.z,
 		0, 0, 0, 1
 	};
 	translate.data = arr;
@@ -47,6 +47,7 @@ Vertex2D worldToView(const Vertex3D& source, const Vertex3D& camera,
 	src = WtoV * src;
 
 	Vertex2D res;
+	// if(EQUAL(src(2),0)) throw "Divide by zero";
 	res.x = src(0) / -src(2);
 	res.y = src(1) / -src(2);
 

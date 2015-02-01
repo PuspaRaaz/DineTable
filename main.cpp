@@ -5,35 +5,35 @@
 #include <SDL/SDL.h>
 
 int main(){
-    int width = 800, height = 640;
-	Screen S(width,height);
+    int width = 1366, height = 768;
     SDL_WM_SetCaption("DineTable", NULL);
-    Color C(255,255,255);
-    Vertex3D cam(25,25,25), viewPlane(0,0,0);
-// v 1.185411 0.974581 0.457572
-// v 1.201808 0.907400 0.464548
-// v 1.300536 0.907400 -0.035470
-// v 1.282763 0.974581 -0.035470
-    Vertex3D a(1.185411, 0.974581, 0.457572), b(1.201808, 0.907400, 0.464548), c(1.300536, 0.907400, -0.035470), d(1.282763, 0.974581, -0.035470);
+    float plane = 14;
+    Vertex3D cam(400,320,0), viewPlane(400,320,100);
+    Vertex3D a(400,340,10), b(300,330,50), c(500,330,50), d(400,250,10);
     Vertex3D v3[4] = {a, b, c, d};
     Vertex2D v2[4];
     for(int i = 0; i < 4; i++){
-        v2[i] = worldToView(v3[i],cam,viewPlane,0.15,0.15,width,height);
+        v2[i] = worldToView(v3[i], cam, viewPlane, plane, plane, width, height);
         std::cout<<v2[i].x<<" "<<v2[i].y<<"\n";
     }
-    unsigned int t1 = 0;
-    unsigned int t2 = 1;
-    unsigned int t3 = 2;
-    unsigned int t4 = 3;
-    S.line(v2[t1],v2[t2],Red);
-    S.line(v2[t2],v2[t3],Green);
-    S.line(v2[t3],v2[t4],Blue);
-    S.line(v2[t1],v2[t4],White);
-    // S.line(v2[t2],v2[t4],White);
-    // S.line(v2[t3],v2[t4],White);
-    S.refresh();
-    SDL_Delay(5000);
-    SDL_Quit();
 
+    SDL_Event quitEvent;
+    bool quit = false;
+    while(!quit){
+        Uint8* keystates = SDL_GetKeyState(NULL);
+        if(keystates[SDL_QUIT] || keystates[SDLK_q] || keystates[SDLK_BACKSPACE] || keystates[SDLK_ESCAPE]){
+            quit = true;
+        }
+        Screen S(width,height);
+        S.line(v2[0],v2[1],White);
+        S.line(v2[1],v2[2],White);
+        S.line(v2[2],v2[0],White);
+        S.line(v2[0],v2[3],Red);
+        S.line(v2[1],v2[3],Green);
+        S.line(v2[2],v2[3],Blue);
+        S.refresh();
+        S.clear();
+    }
+    SDL_Quit();
 	return 0;
 };

@@ -10,6 +10,16 @@ public:
 	~Vertex2D(){};
 };
 
+class Surface
+{
+public:
+	float a, b, c, d;
+	Surface():a(0), b(0), c(0), d(0){}
+	Surface(float A, float B, float C, float D):a(A),b(B),c(C),d(D){}
+	~Surface(){}
+	
+};
+
 //3D vertex with z coordinate included
 class Vertex3D
 {

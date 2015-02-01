@@ -23,7 +23,7 @@ public:
 	    int width = screen->w;
 	    int height = screen->h;
 	    int x=ROUNDOFF(v.x), y=ROUNDOFF(v.y);
-	    if (x < 0 && x > width && y < 0 && y > height) return; //if the vertex is out of screen, return without plot
+	    if (x < 0 && x > width && y < 0 && y > height) throw "Out of Bound"; //if the vertex is out of screen, return without plot
 	    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b); //map color into uint
 	    y = y*screen->pitch/4;
 	    pixmem32 = (int*) screen->pixels+y+x; //plot pixel
@@ -37,7 +37,7 @@ public:
 	    int width = screen->w;
 	    int height = screen->h;
 	    x=ROUNDOFF(x); y=ROUNDOFF(y);
-	    if (x < 0 && x > width && y < 0 && y > height) return;
+	    if (x < 0 && x > width && y < 0 && y > height) throw "Out of Bound";
 	    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);
 	    y = y*screen->pitch/4;
 	    pixmem32 = (int*) screen->pixels+y+x;
@@ -69,11 +69,8 @@ public:
 	}
 
 	//clear the whole screen
-	void clrscr(){
-	    SDL_Rect R;
-	    R.x =0; R.y =0;
-	    R.h = screen->h; R.w = screen->w;
-	    SDL_FillRect(screen,&R,0);
+	void clear(){
+		SDL_FreeSurface(screen);
 	}
 
 	//destructor
