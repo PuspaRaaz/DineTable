@@ -17,7 +17,7 @@ void Object3d::LoadObject(string filename){
     if (!obj.is_open()) throw "Can not open";
 
     vector <Vec3> temp;
-    string line,keyword;;
+    string line,keyword;
     while(getline(obj,line)){
         while(line.compare(0,1," ")==0)
             line.erase(line.begin()); // remove leading whitespaces

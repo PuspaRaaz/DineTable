@@ -1,12 +1,12 @@
 #ifndef _WORLDTOVIEW_H_
 #define _WORLDTOVIEW_H_
 
-#include "Matrix.h"
 #include "Vertex.h"
+#include "Matrix.h"
 
 //changes 3D vertex into corresponding plotable 2D vertex
 Vertex2D worldToView(const Vertex3D& source, const Vertex3D& cam,
-	const Vertex3D& viewPlane, float planeWidht, float planeHeight,
+	const Vertex3D& viewPlane, float planeWidth, float planeHeight,
 	int winWidth, int winHeight)
 {
 	Matrix WtoV(4,4);
@@ -51,7 +51,7 @@ Vertex2D worldToView(const Vertex3D& source, const Vertex3D& cam,
 	res.x = src(0) / -src(2);
 	res.y = src(1) / -src(2);
 
-	res.x = (res.x + planeWidht*0.5) / planeWidht;
+	res.x = (res.x + planeWidth*0.5) / planeWidth;
 	res.y = (res.y + planeHeight*0.5) / planeHeight;
 
 	res.x = (int)(res.x * winWidth);

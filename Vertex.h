@@ -1,6 +1,7 @@
 #ifndef _VERTEX_H_
 #define _VERTEX_H_
 
+#include <cmath>
 //2D vertex consisting only x and y
 class Vertex2D{
 public:
@@ -8,16 +9,6 @@ public:
 	Vertex2D():x(0), y(0){}
 	Vertex2D(int xx, int yy):x(xx), y(yy){}
 	~Vertex2D(){};
-};
-
-class Surface
-{
-public:
-	float a, b, c, d;
-	Surface():a(0), b(0), c(0), d(0){}
-	Surface(float A, float B, float C, float D):a(A),b(B),c(C),d(D){}
-	~Surface(){}
-	
 };
 
 //3D vertex with z coordinate included
@@ -55,7 +46,7 @@ float Vertex3D::dotProduct (const Vertex3D vec) const{
 	return (x*vec.x + y*vec.y + z*vec.z);
 }
 float Vertex3D::magnitude() const{
-	return std::sqrt(x*x + y*y + z*z);
+	return sqrt(x*x + y*y + z*z);
 }
 
 #endif

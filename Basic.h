@@ -1,8 +1,7 @@
 #ifndef _BASIC_H_
 #define _BASIC_H_
 
-#include <iostream>
-#include <cmath>
+#include "include.h"
 
 #define PI 3.1415926 //value of pi
 #define PRECISION 0.00001 //precision required

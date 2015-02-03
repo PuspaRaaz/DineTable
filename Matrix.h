@@ -11,6 +11,9 @@ public:
 	float *data;
 
 	//constructor
+	Matrix():row(0),col(0){
+		data = new float[0];
+	}
 	Matrix(int r, int c):row(r),col(c){
 		data = new float[row * col];
 	}

@@ -3,8 +3,8 @@
 
 #include "Basic.h"
 #include "Vertex.h"
-
 #include <SDL/SDL.h>
+
 class Screen
 {
 
@@ -14,6 +14,7 @@ public:
 		if((SDL_Init(SDL_INIT_EVERYTHING)) == -1) return; //initialize SDL
 		if((screen = SDL_SetVideoMode(width, height, 32, SDL_SWSURFACE | SDL_RESIZABLE)) == NULL) //set sdl videomode in software buffer and make it resizable
 			return;
+    	SDL_WM_SetCaption("DineTable", NULL);
 	}
 
 	//pixel plot function with pixel as 2D vertex
