@@ -39,8 +39,10 @@ float& Matrix::operator() (int pos){
 }
 
 Matrix Matrix::operator+ (Matrix& mat){
-	if(row != mat.row && col != mat.col)
+	if(row != mat.row && col != mat.col){
+		std::cout<<"Unequal matrix dimensions. (operator+)\n";
 		throw "ERROR";
+	}
 	Matrix res(row, col);
 	for (int i = 0; i < row; i++){
 		for (int j = 0; j < col; j++){
@@ -52,8 +54,10 @@ Matrix Matrix::operator+ (Matrix& mat){
 }
 
 Matrix Matrix::operator- (Matrix& mat){
-	if(row != mat.row && col != mat.col)
+	if(row != mat.row && col != mat.col){
+		std::cout<<"Unequal matrix dimensions. (operator-)\n";
 		throw "ERROR";
+	}
 	Matrix res(row, col);
 	for (int i = 0; i < row; i++){
 		for (int j = 0; j < col; j++){
@@ -65,8 +69,10 @@ Matrix Matrix::operator- (Matrix& mat){
 }
 
 Matrix Matrix::operator* (Matrix& mat){
-	if(col != mat.row)
+	if(col != mat.row){
+		std::cout<<"Unequal matrix dimensions. (operator*)\n";
 		throw "ERROR";
+	}
 	Matrix res(row, mat.col);
 	for (int i = 0; i < row; i++){
 		for (int j = 0; j < mat.col; j++){

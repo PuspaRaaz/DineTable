@@ -3,7 +3,7 @@
 
 #include "Screen.h"
 #include "Vertex.h"
-#include "WorldToView.h"
+#include "Perspective.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -56,7 +56,10 @@ void Object3D::addSurface(Vertex3D& ver){
 Object3D::Object3D(const string& filename){
 	vertexMatrix.clear();
 	ifstream objFile(filename.c_str());
-	if(!objFile.is_open()) throw "Can't open";
+	if(!objFile.is_open()) {
+		std::cout<<"Can't open the file.\n";
+		throw "Can't open";
+	}
 	std::vector<Vertex3D> temp;
 	string line, keyword;
 	unsigned int count = 1, vN = 0, vtN = 0, fN = 0, els = 0;
@@ -128,7 +131,7 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
     unsigned int len = vertexMatrix.size();
     Vertex2D v2[len];
     for(int i = 0; i < len; i++){
-        v2[i] = worldToView(vertexMatrix[i], cam, viewPlane, plane, plane, width, height);
+        v2[i] = perspective(vertexMatrix[i], cam, viewPlane, plane, plane, width, height);
         // if(i%8 == 0) std::cout<<std::endl;
         // std::cout<<v2[i].x<<" "<<v2[i].y<<"\t";
     }
