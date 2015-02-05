@@ -2,6 +2,7 @@
 #define _MATRIX_H_
 
 #include <iostream>
+#include <string>
 
 class Matrix
 {
@@ -11,23 +12,39 @@ public:
 	float *data;
 
 	//constructor
-	Matrix():row(0),col(0){
-		data = new float[0];
-	}
 	Matrix(int r, int c):row(r),col(c){
 		data = new float[row * col];
 	}
+	Matrix(const Matrix& m){
+		data = new float[m.row*m.col];
+		row = m.row;
+		col = m.col;
+		memcpy(data, m.data, row*col*sizeof(float));
+	}
 
 	//destructor
-	~Matrix(){};
+	~Matrix(){
+		// delete []data;
+	};
 
-	float& operator() (int r, int c); //returns the value of Matrix(r,c)
-	float& operator() (int pos); //returns the value of Matrix(pos) = Matrix.data[pos]
-	Matrix operator+ (Matrix& mat); //returns this + mat
-	Matrix operator- (Matrix& mat); //returns this - mat
-	Matrix operator* (Matrix& mat); //returns this * mat (cross-product)
+	const float& operator() (int, int) const; //returns the value of Matrix(r,c)
+	const float& operator() (int) const; //returns the value of Matrix(pos) = Matrix.data[pos]
+	float& operator() (int, int); //returns the value of Matrix(r,c)
+	float& operator() (int); //returns the value of Matrix(pos) = Matrix.data[pos]
+	Matrix operator+ (Matrix&); //returns this + mat
+	Matrix operator- (Matrix&); //returns this - mat
+	Matrix operator* (Matrix&); //returns this * mat (cross-product)
 	void displayMat(); //display matrix in row*col form
 };
+
+const float& Matrix::operator() (int r, int c) const {
+	int pos = col*r + c;
+	return data[pos];
+}
+
+const float& Matrix::operator() (int pos) const {
+	return data[pos];
+}
 
 float& Matrix::operator() (int r, int c){
 	int pos = col*r + c;

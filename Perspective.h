@@ -2,65 +2,77 @@
 #define _PERSPECTIVE_H_
 
 #include "Vertex.h"
+#include "Basic.h"
 #include "Matrix.h"
 
 //changes 3D vertex into corresponding plotable 2D vertex
 Vertex2D perspective(const Vertex3D& source, const Vertex3D& cam,
-	const Vertex3D& viewPlane, float planeWidth, float planeHeight,
-	int winWidth, int winHeight)
-{
-	Matrix WtoV(4,4);
-	Vertex3D N, U, V(0, 1, 0);
+	const Vertex3D& view, float n, float f, int width, int height){
+	Matrix translation(4,4), rotationY(4,4), rotationX(4,4);
+	Matrix perspect(4,4), WtoV(4,4), src(4,1);
 
-	N = cam - viewPlane;
-	N = N / N.magnitude();
-
-	U = V.crossProduct(N);
-	U = U / U.magnitude();
-
-	V = N.crossProduct(U);
-
-	Matrix translate(4,4);
-	float arr[16] = {
+	float arrT[16] = {
 		1, 0, 0, -cam.x,
 		0, 1, 0, -cam.y,
 		0, 0, 1, -cam.z,
 		0, 0, 0, 1
 	};
-	translate.data = arr;
+	translation.data = arrT;
 
-	Matrix rotate(4,4);
-	float arr2[16] = {
-		U.x, U.y, U.z, 0,
-		V.x, V.y, V.z, 0,
-		N.x, N.y, N.z, 0,
-		0, 0, 0, 1
+	float theta;
+	if(view.z > 0)
+		theta = PI - atan(view.x/view.magnitude());
+	else
+		theta = atan(view.x/view.magnitude());
+	float cosine = cos(theta);
+	float sine = sin(theta);
+	float arrRY[16] = {
+	    cosine, 0,      sine,   0,
+	    0,      1,      0,      0,
+	    -sine,  0,      cosine, 0,
+	    0,      0,      0,      1		
 	};
-	rotate.data = arr2;
+	rotationY.data = arrRY;
 
-	WtoV = rotate * translate;
+	theta = -atan(view.y/sqrt(view.x*view.x + view.z*view.z));
+	cosine = cos(theta);
+	sine = sin(theta);
+	float arrRX[16] = {
+		1,      0,      0,      0,
+        0,      cosine, -sine,  0,
+        0,      sine,   cosine, 0,
+        0,      0,      0,      1
+	};
+	rotationX.data = arrRX;
 
-	Matrix src(4,1);
-	float arr3[4] = {source.x, source.y, source.z, 1};
-	src.data = arr3;
+	theta = 95; float ratio = width/height;
+	float tangent = tan(theta/2*PI/180);
+	float arrP[16] = {
+		1/tangent,  0,              0,              0,
+        0,          ratio/tangent,  0,              0,
+        0,          0,              -(n+f)/(f-n),   -(2*f*n)/(f-n),
+        0,          0,              -1,              0
+    };
+    perspect.data = arrP;
 
-	src = WtoV * src;
+    WtoV = (((perspect * rotationX) * rotationY) * translation);
+    
+    Matrix cop(4,1);
+    float arrC[4] = {source.x, source.y, source.z, 1};
+    cop.data = arrC;
 
-	Vertex2D res;
-	if(EQUAL(src(2),0)){
-		std::cout<<"Divide by zero.\n";
-		throw "Divide by zero";
-	}
-	res.x = src(0) / -src(2);
-	res.y = src(1) / -src(2);
+    Matrix copy = WtoV * cop;
+    copy(0) /= copy(3);
+    copy(1) /= copy(3);
+    copy(2) /= copy(3);
+    copy(0) = copy(0)*width + width/2;
+    copy(1) = height/2 - copy(1)*height;
+    copy(2) = (-copy(2)*0.5 + 0.5) * 0xffffff;
 
-	res.x = (res.x + planeWidth*0.5) / planeWidth;
-	res.y = (res.y + planeHeight*0.5) / planeHeight;
-
-	res.x = (int)(res.x * winWidth);
-	res.y = (int)(res.y * winHeight);
-
-	return res;
+    Vertex2D res;
+    res.x = copy(0);
+    res.y = copy(1);
+    return res;
 }
 
 #endif

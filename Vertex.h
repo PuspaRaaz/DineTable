@@ -8,6 +8,7 @@ public:
 	float x, y;
 	Vertex2D():x(0), y(0){}
 	Vertex2D(int xx, int yy):x(xx), y(yy){}
+	Vertex2D(const Vertex2D& v):x(v.x),y(v.y){}
 	~Vertex2D(){};
 };
 

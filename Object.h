@@ -29,15 +29,23 @@ class Object3D
 private:
 	std::vector<Vertex3D> vertexMatrix;
 	std::vector<Vertex3D> vertexNormal;
-	std::vector<Vertex3D> surface;
+	std::vector<Vertex3D> vertexTexture;
+	std::vector<Vertex3D> surfaceVertex;
+	std::vector<Vertex3D> surfaceNormal;
+	std::vector<Vertex3D> surfaceTexture;
 public:
+	// Object3D(){}
 	Object3D(const string&);
 	void addVertex(Vertex3D&);
 	void addVertex(unsigned int, Vertex3D);
-	void addSurface(Vertex3D&);
+	void addSurface(Vertex3D&, Vertex3D&, Vertex3D&);
 	void addnormal(Vertex3D&);
 	void addTexture(Vertex3D&);
 	void draw(Vertex3D&, Vertex3D&);
+	Matrix vMatrix();
+	Matrix vtMatrix();
+	Matrix vnMatrix();
+	Matrix fMatrix();
 	~Object3D(){}
 };
 
@@ -48,10 +56,10 @@ void Object3D::addVertex(Vertex3D& ver){
 }
 void Object3D::addTexture(Vertex3D& ver){
 }
-void Object3D::addSurface(Vertex3D& ver){
-	surface.push_back(Vertex3D());
-	unsigned int index = surface.size() - 1;
-	surface[index] = ver;
+void Object3D::addSurface(Vertex3D& ver, Vertex3D& tex, Vertex3D& nor){
+	surfaceVertex.push_back(Vertex3D());
+	unsigned int index = surfaceVertex.size() - 1;
+	surfaceVertex[index] = ver;
 }
 Object3D::Object3D(const string& filename){
 	vertexMatrix.clear();
@@ -71,7 +79,7 @@ Object3D::Object3D(const string& filename){
 
 		istringstream linestream(line);
 		linestream >> keyword;
-		if(line.length() == 0) keyword = "p";
+		if(line.length() == 0) keyword = "";
 		if(keyword == "v"){
 			Vertex3D tempV;
 			unsigned int t;
@@ -84,7 +92,6 @@ Object3D::Object3D(const string& filename){
 				tempV = tempV / t;
 			addVertex(tempV);
 			vN++;
-			// cout<< count++ << " " << keyword << " ("<< tempV.x<< ", "<< tempV.y<< ", "<<tempV.z<<")"<< endl;
 		}
 		else if(keyword == "vt"){
 			Vertex3D tempV;
@@ -93,7 +100,6 @@ Object3D::Object3D(const string& filename){
 			linestream >> tempV.z;
 			addTexture(tempV);
 			vtN++;
-			// cout<< count++ << " " << keyword << " ("<< tempV.x<< ", "<< tempV.y<< ", "<<tempV.z<<")"<< endl;
 		}
 		else if(keyword == "f"){
 			if(line.length() > 0)
@@ -107,61 +113,48 @@ Object3D::Object3D(const string& filename){
 			Vertex3D ver, text;
 			lstream >> ver.x;
 			lstream >> text.x;
+			lstream >> text.x;
 			lstream >> ver.y;
+			lstream >> text.y;
 			lstream >> text.y;
 			lstream >> ver.z;
 			lstream >> text.z;
+			lstream >> text.z;
 			fN++;
-			addSurface(ver);
-			// cout<<count++<<" f ("<<temp[0].x<<"/"<<temp[1].x<<", "<<temp[0].y<<"/"<<temp[1].y<<", "<<temp[0].z<<"/"<<temp[1].z<<")"<<endl;
-		}
-		else{
-			// cout<<count++<<" "<<keyword<<endl;
-			els++;
+			addSurface(ver,ver,ver);
 		}
 	}
-	cout<<vN<<" "<<vtN<<" "<<fN<<" "<<els<<endl;
+	cout<<"Vertices: "<<vN<<", Surfaces: "<<fN<<endl;
 }
 
 void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
-	int width = 800, height = 800;
+	int width = 960, height = 720;
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
-    float plane = 100;
+    float plane = 1000;
     unsigned int len = vertexMatrix.size();
     Vertex2D v2[len];
     for(int i = 0; i < len; i++){
-        v2[i] = perspective(vertexMatrix[i], cam, viewPlane, plane, plane, width, height);
-        // if(i%8 == 0) std::cout<<std::endl;
-        // std::cout<<v2[i].x<<" "<<v2[i].y<<"\t";
+        v2[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height);
     }
-    cout<<"\n\nvertices : "<<len<<endl<<endl;
-    len = surface.size();
-    cout<<"\n\nSurfaces : "<<len<<endl<<endl;
     unsigned int t1, t2, count;
     for(unsigned int i = 0; i < len; i++){
     	count = i;
-    	t1 = surface[i].x-1;
-    	t2 = surface[i].y-1;
-    	std::cout<<" ("<<t1<<" -> "<<t2<<") ";
-    	std::cout<<" ("<<v2[t1].x<<", "<<v2[t1].y<<") -> ("<<v2[t2].x<<", "<<v2[t2].y<<")\n";
+    	t1 = surfaceVertex[i].x-1;
+    	t2 = surfaceVertex[i].y-1;
     	DineTable.line(v2[t1], v2[t2], White);
 
-    	t1 = surface[i].y-1;
-    	t2 = surface[i].z-1;
-    	std::cout<<" ("<<t1<<" -> "<<t2<<") ";
-    	std::cout<<" ("<<v2[t1].x<<", "<<v2[t1].y<<") -> ("<<v2[t2].x<<", "<<v2[t2].y<<")\n";
+    	t1 = surfaceVertex[i].y-1;
+    	t2 = surfaceVertex[i].z-1;
     	DineTable.line(v2[t1], v2[t2], White);
 
-    	t1 = surface[i].z-1;
-    	t2 = surface[i].x-1;
-    	std::cout<<" ("<<t1<<" -> "<<t2<<") ";
-    	std::cout<<" ("<<v2[t1].x<<", "<<v2[t1].y<<") -> ("<<v2[t2].x<<", "<<v2[t2].y<<")\n\n";
+    	t1 = surfaceVertex[i].z-1;
+    	t2 = surfaceVertex[i].x-1;
     	DineTable.line(v2[t1], v2[t2], White);
     }
-    std::cout<<count<<endl;
     DineTable.refresh();
     DineTable.clear();
+    
 }
 
 #endif
