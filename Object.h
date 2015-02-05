@@ -138,6 +138,7 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
         v2[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height);
     }
     unsigned int t1, t2, count;
+    len = surfaceVertex.size();
     for(unsigned int i = 0; i < len; i++){
     	count = i;
     	t1 = surfaceVertex[i].x-1;
