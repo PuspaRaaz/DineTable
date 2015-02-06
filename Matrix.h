@@ -15,6 +15,8 @@ public:
 	Matrix(int r, int c):row(r),col(c){
 		data = new float[row * col];
 	}
+
+	//copy constructor
 	Matrix(const Matrix& m){
 		data = new float[m.row*m.col];
 		row = m.row;
@@ -24,16 +26,30 @@ public:
 
 	//destructor
 	~Matrix(){
-		// delete []data;
+		if(this->data){
+			delete []data;
+		}
 	};
 
-	const float& operator() (int, int) const; //returns the value of Matrix(r,c)
-	const float& operator() (int) const; //returns the value of Matrix(pos) = Matrix.data[pos]
+	//matrix initializer, receives any numbers of arguments
+	template<typename... Types>
+	void init(Types... args){
+		const int size = sizeof...(args);
+		if(size != row*col)
+			return;
+		float temp[] = {static_cast<float>(args)...};
+		memcpy(data, temp, row*col*sizeof(float));
+	}
+
+	const float& operator() (int, int) const;
+	const float& operator() (int) const;
 	float& operator() (int, int); //returns the value of Matrix(r,c)
 	float& operator() (int); //returns the value of Matrix(pos) = Matrix.data[pos]
-	Matrix operator+ (Matrix&); //returns this + mat
-	Matrix operator- (Matrix&); //returns this - mat
-	Matrix operator* (Matrix&); //returns this * mat (cross-product)
+	Matrix operator+ (const Matrix&) const; //returns this + mat
+	Matrix operator- (const Matrix&) const; //returns this - mat
+	Matrix operator* (const Matrix&) const; //returns this * mat (cross-product)
+	void operator%= (const Matrix&); //returns mat * this (cross product)
+	void operator= (const Matrix&); //assignment operator overloaded
 	void displayMat(); //display matrix in row*col form
 };
 
@@ -55,7 +71,19 @@ float& Matrix::operator() (int pos){
 	return data[pos];
 }
 
-Matrix Matrix::operator+ (Matrix& mat){
+void Matrix::operator= (const Matrix& mat){
+	if(this == &mat)
+		return;
+	if(row*col != mat.row*mat.col){
+		delete []data;
+		data = new float[mat.row*mat.col];
+	}
+	row = mat.row;
+	col = mat.col;
+	memcpy(data, mat.data, row*col*sizeof(float));
+}
+
+Matrix Matrix::operator+ (const Matrix& mat) const{
 	if(row != mat.row && col != mat.col){
 		std::cout<<"Unequal matrix dimensions. (operator+)\n";
 		throw "ERROR";
@@ -70,7 +98,7 @@ Matrix Matrix::operator+ (Matrix& mat){
 	return res;
 }
 
-Matrix Matrix::operator- (Matrix& mat){
+Matrix Matrix::operator- (const Matrix& mat) const{
 	if(row != mat.row && col != mat.col){
 		std::cout<<"Unequal matrix dimensions. (operator-)\n";
 		throw "ERROR";
@@ -85,7 +113,7 @@ Matrix Matrix::operator- (Matrix& mat){
 	return res;
 }
 
-Matrix Matrix::operator* (Matrix& mat){
+Matrix Matrix::operator* (const Matrix& mat) const{
 	if(col != mat.row){
 		std::cout<<"Unequal matrix dimensions. (operator*)\n";
 		throw "ERROR";
@@ -101,6 +129,11 @@ Matrix Matrix::operator* (Matrix& mat){
 		}
 	}
 	return res;
+}
+
+void Matrix::operator%= (const Matrix& mat){
+	Matrix temp = mat*(*this);
+	*this = temp;
 }
 
 void Matrix::displayMat(){

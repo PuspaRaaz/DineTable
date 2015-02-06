@@ -27,25 +27,26 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 class Object3D
 {
 private:
-	std::vector<Vertex3D> vertexMatrix;
-	std::vector<Vertex3D> vertexNormal;
-	std::vector<Vertex3D> vertexTexture;
-	std::vector<Vertex3D> surfaceVertex;
-	std::vector<Vertex3D> surfaceNormal;
-	std::vector<Vertex3D> surfaceTexture;
+	std::vector<Vertex3D> vertexMatrix; //stores the array of vertices
+	std::vector<Vertex3D> vertexNormal; //stores the array of vertex normals
+	std::vector<Vertex3D> vertexTexture; //stores the array of vertex textures
+	std::vector<Vertex3D> surfaceVertex; //stores the array of vertices of a face
+	std::vector<Vertex3D> surfaceNormal; //stores the array of vertex normals of a face
+	std::vector<Vertex3D> surfaceTexture; //stores the arrayo of vertex texture of a face
 public:
 	// Object3D(){}
-	Object3D(const string&);
-	void addVertex(Vertex3D&);
-	void addVertex(unsigned int, Vertex3D);
-	void addSurface(Vertex3D&, Vertex3D&, Vertex3D&);
-	void addnormal(Vertex3D&);
-	void addTexture(Vertex3D&);
-	void draw(Vertex3D&, Vertex3D&);
-	Matrix vMatrix();
-	Matrix vtMatrix();
-	Matrix vnMatrix();
-	Matrix fMatrix();
+	Object3D(const string&); //constructor, loads .obj file
+	void addVertex(Vertex3D&); //adds a new vertex to the vertexMatrix
+	void addSurface(Vertex3D&, Vertex3D&, Vertex3D&); //adds a new surface to the surfaceMatrix along with surface normals and surface textures
+	void addnormal(Vertex3D&); //adds a new vertex normal to the vertexNormal
+	void addTexture(Vertex3D&); //adds a new vertex texture to the vertexTexture
+	void draw(Vertex3D&, Vertex3D&); //draw wireframe of the object loaded considering camera and lookAt position
+	Matrix vMatrix(); //returns a single matrix of object vertices
+	Matrix vtMatrix(); //returns a single matrix of object vertex textures
+	Matrix vnMatrix(); //returns a single matrix of object vertex normals
+	Matrix fMatrix(); //returns a single matrix of object faces
+	Matrix ftMatrix(); //returns a single matrix of object face textures
+	Matrix fnMatrix(); //returns a single matrix of object face normals
 	~Object3D(){}
 };
 
@@ -54,12 +55,23 @@ void Object3D::addVertex(Vertex3D& ver){
 	unsigned int index = vertexMatrix.size() - 1;
 	vertexMatrix[index] = ver;
 }
-void Object3D::addTexture(Vertex3D& ver){
+void Object3D::addTexture(Vertex3D& tex){
+	vertexTexture.push_back(Vertex3D());
+	unsigned int index = vertexTexture.size() - 1;
+	vertexTexture[index] = tex;
 }
 void Object3D::addSurface(Vertex3D& ver, Vertex3D& tex, Vertex3D& nor){
 	surfaceVertex.push_back(Vertex3D());
 	unsigned int index = surfaceVertex.size() - 1;
 	surfaceVertex[index] = ver;
+
+	surfaceTexture.push_back(Vertex3D());
+	unsigned int index = surfaceTexture.size() - 1;
+	surfaceTexture[index] = tex;
+
+	surfaceNormal.push_back(Vertex3D());
+	unsigned int index = surfaceNormal.size() - 1;
+	surfaceNormal[index] = nor;
 }
 Object3D::Object3D(const string& filename){
 	vertexMatrix.clear();
@@ -70,16 +82,17 @@ Object3D::Object3D(const string& filename){
 	}
 	std::vector<Vertex3D> temp;
 	string line, keyword;
-	unsigned int count = 1, vN = 0, vtN = 0, fN = 0, els = 0;
+	unsigned int vN = 0, vtN = 0, fN = 0;
 	while(getline(objFile, line)){
 		while(line.compare(0,1," ") == 0)
-			line.erase(line.begin());
+			line.erase(line.begin()); //erases all leading spaces
 		while(line.size() > 0 && line.compare(line.size()-1,1," ") == 0)
-			line.erase(line.end()-1);
+			line.erase(line.end()-1); //erases all following spaces
 
 		istringstream linestream(line);
 		linestream >> keyword;
-		if(line.length() == 0) keyword = "";
+		if(line.length() == 0) keyword = ""; //if line is empty, reset the keyword
+		//this is done as the keyword remains same of the latest line and causes errors
 		if(keyword == "v"){
 			Vertex3D tempV;
 			unsigned int t;
@@ -89,7 +102,7 @@ Object3D::Object3D(const string& filename){
 			if(!(linestream >> t))
 				t = 1.0f;
 			if(t > 0 && t < 1)
-				tempV = tempV / t;
+				tempV = tempV / t; //normalize the vertex
 			addVertex(tempV);
 			vN++;
 		}
@@ -110,21 +123,21 @@ Object3D::Object3D(const string& filename){
 				line.erase(line.end()-1);
 			replaceAll(line,"/"," ");
 			istringstream lstream(line);
-			Vertex3D ver, text;
+			Vertex3D ver, tex, nor;
 			lstream >> ver.x;
-			lstream >> text.x;
-			lstream >> text.x;
+			lstream >> tex.x;
+			lstream >> nor.x;
 			lstream >> ver.y;
-			lstream >> text.y;
-			lstream >> text.y;
+			lstream >> tex.y;
+			lstream >> nor.y;
 			lstream >> ver.z;
-			lstream >> text.z;
-			lstream >> text.z;
+			lstream >> tex.z;
+			lstream >> nor.z;
 			fN++;
-			addSurface(ver,ver,ver);
+			addSurface(ver,tex,nor);
 		}
 	}
-	cout<<"Vertices: "<<vN<<", Surfaces: "<<fN<<endl;
+	cout<<"Vertices: "<<vN<<", Surfaces: "<<fN<<"\n"<<endl;
 }
 
 void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
@@ -135,12 +148,11 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
     unsigned int len = vertexMatrix.size();
     Vertex2D v2[len];
     for(int i = 0; i < len; i++){
-        v2[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height);
+        v2[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
     }
-    unsigned int t1, t2, count;
+    unsigned int t1, t2;
     len = surfaceVertex.size();
     for(unsigned int i = 0; i < len; i++){
-    	count = i;
     	t1 = surfaceVertex[i].x-1;
     	t2 = surfaceVertex[i].y-1;
     	DineTable.line(v2[t1], v2[t2], White);
@@ -154,8 +166,7 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
     	DineTable.line(v2[t1], v2[t2], White);
     }
     DineTable.refresh();
-    DineTable.clear();
-    
+    DineTable.clear();    
 }
 
 #endif

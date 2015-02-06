@@ -11,7 +11,6 @@ int main(){
     Vertex3D cam(0,100,320), viewPlane(0,0,-1);
     Object3D dineTable("DineT.obj");
     Time timer;
-    // SDL_Delay(5000);
     SDL_Event event;
     bool quit = false;
     while(!quit){
@@ -55,9 +54,7 @@ int main(){
         }
         std::cout << DELETE;
         std::cout<<"FPS :\t"<<fps<<std::endl;
-        // quit = true;
     }
-    // SDL_Delay(5000);
     SDL_Quit();
 	return 0;
 };

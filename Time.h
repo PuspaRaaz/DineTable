@@ -5,8 +5,8 @@
 
 class Time {
     private:
-        timeval m_start,m_end;
-        bool m_running;
+        timeval start,end;
+        bool isRunning;
 
     public:
         // Constructor
@@ -24,33 +24,29 @@ class Time {
 };
 
 
-inline Time::Time() : m_running(false) {
+inline Time::Time() : isRunning(false) {
 }
 
 // Start the benchmark
 inline void Time::start() {
-    if(!m_running) {
-        gettimeofday(&m_start,0);
-        m_running = true;
+    if(!isRunning) {
+        gettimeofday(&start,0);
+        isRunning = true;
     }
 }
 
 // Stop the benchmark
 inline void Time::stop() {
-    if(m_running){
-        gettimeofday(&m_end,0);
-        m_running = false;
+    if(isRunning){
+        gettimeofday(&end,0);
+        isRunning = false;
     }
 }
 
 // Return the difference between start time
 // and stop time in micro seconds
 inline uintmax_t Time::time() {
-    if(m_running){
-        std::cout<<"WTF!!!\n";
-        throw "WTF!!!";
-    }
-    return (m_end.tv_sec * 1e6 + m_end.tv_usec - m_start.tv_sec * 1e6 - m_start.tv_usec);
+    return (end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec);
 }
 
 #endif

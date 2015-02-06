@@ -14,14 +14,14 @@ class Color
 {
 public:
 	int r, g, b, a;
-	Color():r(255), g(255), b(255), a(255){}
+	Color():r(255), g(255), b(255), a(255){} //default is a white
 	Color(int red, int green, int blue, int alpha = 255):
 		r(red), g(green), b(blue), a(alpha){}
 	~Color(){}
 	
 };
 
-//predifined colors
+//predifined colors with alpha -> 255
 extern const Color White(255,255,255);
 extern const Color Black(0, 0, 0);
 extern const Color Red(255,0,0);
