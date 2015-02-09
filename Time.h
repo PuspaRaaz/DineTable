@@ -5,7 +5,7 @@
 
 class Time {
     private:
-        timeval start,end;
+        timeval suru,antya;
         bool isRunning;
 
     public:
@@ -30,7 +30,7 @@ inline Time::Time() : isRunning(false) {
 // Start the benchmark
 inline void Time::start() {
     if(!isRunning) {
-        gettimeofday(&start,0);
+        gettimeofday(&suru,0);
         isRunning = true;
     }
 }
@@ -38,7 +38,7 @@ inline void Time::start() {
 // Stop the benchmark
 inline void Time::stop() {
     if(isRunning){
-        gettimeofday(&end,0);
+        gettimeofday(&antya,0);
         isRunning = false;
     }
 }
@@ -46,7 +46,7 @@ inline void Time::stop() {
 // Return the difference between start time
 // and stop time in micro seconds
 inline uintmax_t Time::time() {
-    return (end.tv_sec * 1e6 + end.tv_usec - start.tv_sec * 1e6 - start.tv_usec);
+    return (antya.tv_sec * 1e6 + antya.tv_usec - suru.tv_sec * 1e6 - suru.tv_usec);
 }
 
 #endif

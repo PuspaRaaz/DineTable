@@ -22,12 +22,12 @@ public:
 	}
 
 	//pixel plot with x and y supplied differently
-	void setPixel(int x, int y, Color c){
+	void setPixel(int xx, int yy, Color c){
 		int *pixmem32;
 	    int colour;
 	    int width = screen->w;
 	    int height = screen->h;
-	    x=ROUNDOFF(x); y=ROUNDOFF(y);
+	    int x=ROUNDOFF(xx); int y=ROUNDOFF(yy);
 	    if (x < 0 || x > width || y < 0 || y > height){
 			return;
 	    }

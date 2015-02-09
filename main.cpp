@@ -1,57 +1,56 @@
 #include "Object.h"
+#include "Time.h"
 #include "Vertex.h"
 
 #include <SDL/SDL.h>
-#include "Time.h"
 
 #define DELETE "\033[A\033[2K"
 
 int main(){
     int width = 800, height = 600;
-    Vertex3D cam(0,100,320), viewPlane(0,0,-1);
+    Vertex3D cam(0,30,320), viewPlane(0,0,-1);
     Object3D dineTable("DineT.obj");
     Time timer;
     SDL_Event event;
-    bool quit = false;
+    bool quit = false, pause = false;
     while(!quit){
         timer.start();
         while(SDL_PollEvent(&event)){
             switch(event.type)
             {
+                case SDL_QUIT:
+                    quit = true;
+                    break;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym)
                     {
-                        case SDLK_UP:
-                            cam.y--;
-                            break;
-                        case SDLK_DOWN:
-                            cam.y++;
-                            break;
-                        case SDLK_LEFT:
-                            cam.x++;
-                            break;
-                        case SDLK_RIGHT:
-                            cam.x--;
-                            break;
-                        case SDLK_KP_PLUS:
-                            cam.z--;
-                            break;
-                        case SDLK_KP_MINUS:
-                            cam.z++;
+                        case SDLK_SPACE:
+                            pause = (pause)?false:true;
+                            while(pause){
+                                SDL_Event eventPaused;
+                                while(SDL_PollEvent(&eventPaused)){
+                                    switch(eventPaused.type){
+                                        case SDL_KEYDOWN:
+                                            switch (event.key.keysym.sym)
+                                            {
+                                                case SDLK_SPACE:
+                                                    pause = (pause)?false:true;
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                }
+                            }
                             break;
                     }
                     break;
             }
         }
-        SDL_Delay(1);
         dineTable.draw(cam, viewPlane);
+        dineTable.rotate(0.002, 0.000, 0.000);
         timer.stop();
         uintmax_t samay = timer.time();
         float fps = 1e6 / samay;
-        Uint8 *keystates = SDL_GetKeyState( NULL );
-        if( keystates[SDL_QUIT] || keystates[SDLK_q] || keystates[SDLK_ESCAPE] || keystates[SDLK_BACKSPACE]) {
-            quit = true;
-        }
         std::cout << DELETE;
         std::cout<<"FPS :\t"<<fps<<std::endl;
     }

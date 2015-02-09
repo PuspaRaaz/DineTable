@@ -51,6 +51,8 @@ public:
 	void operator%= (const Matrix&); //returns mat * this (cross product)
 	void operator= (const Matrix&); //assignment operator overloaded
 	void displayMat(); //display matrix in row*col form
+	int giveRow(){return row;}
+	int giveCol(){return col;}
 };
 
 const float& Matrix::operator() (int r, int c) const {

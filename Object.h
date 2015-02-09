@@ -41,12 +41,16 @@ public:
 	void addnormal(Vertex3D&); //adds a new vertex normal to the vertexNormal
 	void addTexture(Vertex3D&); //adds a new vertex texture to the vertexTexture
 	void draw(Vertex3D&, Vertex3D&); //draw wireframe of the object loaded considering camera and lookAt position
+	void rotate(float, float, float);
+	void rotateX(float);
+	void rotateY(float);
+	void rotateZ(float);/*
 	Matrix vMatrix(); //returns a single matrix of object vertices
 	Matrix vtMatrix(); //returns a single matrix of object vertex textures
 	Matrix vnMatrix(); //returns a single matrix of object vertex normals
 	Matrix fMatrix(); //returns a single matrix of object faces
 	Matrix ftMatrix(); //returns a single matrix of object face textures
-	Matrix fnMatrix(); //returns a single matrix of object face normals
+	Matrix fnMatrix(); *///returns a single matrix of object face normals
 	~Object3D(){}
 };
 
@@ -66,11 +70,11 @@ void Object3D::addSurface(Vertex3D& ver, Vertex3D& tex, Vertex3D& nor){
 	surfaceVertex[index] = ver;
 
 	surfaceTexture.push_back(Vertex3D());
-	unsigned int index = surfaceTexture.size() - 1;
+	index = surfaceTexture.size() - 1;
 	surfaceTexture[index] = tex;
 
 	surfaceNormal.push_back(Vertex3D());
-	unsigned int index = surfaceNormal.size() - 1;
+	index = surfaceNormal.size() - 1;
 	surfaceNormal[index] = nor;
 }
 Object3D::Object3D(const string& filename){
@@ -92,7 +96,7 @@ Object3D::Object3D(const string& filename){
 		istringstream linestream(line);
 		linestream >> keyword;
 		if(line.length() == 0) keyword = ""; //if line is empty, reset the keyword
-		//this is done as the keyword remains same of the latest line and causes errors
+		//this is to be done as the keyword remains same of the latest line and causes errors
 		if(keyword == "v"){
 			Vertex3D tempV;
 			unsigned int t;
@@ -167,6 +171,61 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
     }
     DineTable.refresh();
     DineTable.clear();    
+}
+
+void Object3D::rotate(float alpha, float beta, float gamma){
+	float cx = cos(alpha), sx = sin(alpha);
+	float cy = cos(beta), sy = sin(beta);
+	float cz = cos(gamma), sz = sin(gamma);
+	for(int i = 0; i < vertexMatrix.size(); i++){
+		vertexMatrix[i].x = vertexMatrix[i].x*(cz*cy) + vertexMatrix[i].y*(cz*sy*sx-sz*cx) + vertexMatrix[i].z*(sz*sx+cz*sy*cx);
+		vertexMatrix[i].y = vertexMatrix[i].x*(sz*cy) + vertexMatrix[i].y*(cz*cx+sz*sy*sx) + vertexMatrix[i].z*(sz*sy*cx-cz*sx);
+		vertexMatrix[i].z = vertexMatrix[i].x*(-sy) + vertexMatrix[i].y*(cy*sx) + vertexMatrix[i].z*(cy*cx);
+	}
+	for(int i = 0; i < vertexNormal.size(); i++){
+		vertexNormal[i].x = vertexNormal[i].x*(cz*cy) + vertexNormal[i].y*(cz*sy*sx-sz*cx) + vertexNormal[i].z*(sz*sx+cz*sy*cx);
+		vertexNormal[i].y = vertexNormal[i].x*(sz*cy) + vertexNormal[i].y*(cz*cx+sz*sy*sx) + vertexNormal[i].z*(sz*sy*cx-cz*sx);
+		vertexNormal[i].z = vertexNormal[i].x*(-sy) + vertexNormal[i].y*(cy*sx) + vertexNormal[i].z*(cy*cx);
+	}
+}
+
+void Object3D::rotateZ(float theta){
+	for (int i = 0; i < vertexMatrix.size(); i++){
+		vertexMatrix[i].x = vertexMatrix[i].x*cos(theta) - vertexMatrix[i].y*sin(theta);
+		vertexMatrix[i].y = vertexMatrix[i].y*cos(theta) + vertexMatrix[i].x*sin(theta);
+		vertexMatrix[i].z = vertexMatrix[i].z;
+	}
+	for (int i = 0; i < vertexNormal.size(); i++){
+		vertexNormal[i].x = vertexNormal[i].x*cos(theta) - vertexNormal[i].y*sin(theta);
+		vertexNormal[i].y = vertexNormal[i].y*cos(theta) + vertexNormal[i].x*sin(theta);
+		vertexNormal[i].z = vertexNormal[i].z;
+	}
+}
+
+void Object3D::rotateY(float theta){
+	for (int i = 0; i < vertexMatrix.size(); i++){
+		vertexMatrix[i].x = vertexMatrix[i].x*cos(theta) + vertexMatrix[i].z*sin(theta);
+		vertexMatrix[i].y = vertexMatrix[i].y;
+		vertexMatrix[i].z = vertexMatrix[i].z*cos(theta) - vertexMatrix[i].x*sin(theta);
+	}
+	for (int i = 0; i < vertexNormal.size(); i++){
+		vertexNormal[i].x = vertexNormal[i].x*cos(theta) + vertexNormal[i].z*sin(theta);
+		vertexNormal[i].y = vertexNormal[i].y;
+		vertexNormal[i].z = vertexNormal[i].z*cos(theta) - vertexNormal[i].x*sin(theta);
+	}
+}
+
+void Object3D::rotateX(float theta){
+	for (int i = 0; i < vertexMatrix.size(); i++){
+		vertexMatrix[i].x = vertexMatrix[i].x;
+		vertexMatrix[i].y = vertexMatrix[i].y*cos(theta) - vertexMatrix[i].z*sin(theta);
+		vertexMatrix[i].z = vertexMatrix[i].z*cos(theta) + vertexMatrix[i].y*sin(theta);
+	}
+	for (int i = 0; i < vertexNormal.size(); i++){
+		vertexNormal[i].x = vertexNormal[i].x;
+		vertexNormal[i].y = vertexNormal[i].y*cos(theta) - vertexNormal[i].z*sin(theta);
+		vertexNormal[i].z = vertexNormal[i].z*cos(theta) + vertexNormal[i].y*sin(theta);
+	}
 }
 
 #endif

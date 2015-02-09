@@ -7,42 +7,56 @@
 
 //gives the translation matrix to translate from a 3D point to origin
 Matrix translation(const Vertex3D v){
-	Matrix translate({4,4});
-	translate.init(
+	Matrix temp({4,4});
+	temp.init(
 		1, 0, 0, v.x,
 		0, 1, 0, v.y,
 		0, 0, 1, v.z,
 		0, 0, 0, 1
 		);
-	return translate;
+	return temp;
 }
 
-//gives the matrix that rotates around y-axis
-Matrix rotateY(float theta){
-	Matrix rotationY({4,4});
-	float cosine = cos(theta);
-	float sine = sin(theta);
-	rotationY.init(
-	    cosine, 0,      sine,   0,
-	    0,      1,      0,      0,
-	    -sine,  0,      cosine, 0,
-	    0,      0,      0,      1
-		);
-	return rotationY;
-}
-
-//gives the matrix that rotates around y-axis
+//gives the matrix that rotates around x-axis
 Matrix rotateX(float theta){
-	Matrix rotationX({4,4});
+	Matrix temp({4,4});
 	float cosine = cos(theta);
 	float sine = sin(theta);
-	rotationX.init(
+	temp.init(
 		1,      0,      0,      0,
         0,      cosine, -sine,  0,
         0,      sine,   cosine, 0,
         0,      0,      0,      1
 		);
-	return rotationX;
+	return temp;
+}
+
+//gives the matrix that rotates around y-axis
+Matrix rotateY(float theta){
+	Matrix temp({4,4});
+	float cosine = cos(theta);
+	float sine = sin(theta);
+	temp.init(
+	    cosine, 0,      sine,   0,
+	    0,      1,      0,      0,
+	    -sine,  0,      cosine, 0,
+	    0,      0,      0,      1
+		);
+	return temp;
+}
+
+//gives the matrix that rotates around z-axis
+Matrix rotateZ(float theta){
+	Matrix temp({4,4});
+	float cosine = cos(theta);
+	float sine = sin(theta);
+	temp.init(
+		cosine,	-sine,   0,  0,
+        sine,	cosine,	0, 	0,
+        0,      0,   	1, 	0,
+        0,      0,      0,  1
+		);
+	return temp;
 }
 
 //gives the matrix normalizes the viewpoint and pipelining
@@ -51,15 +65,15 @@ Matrix rotateX(float theta){
 //n = near point/plane(XY)
 //f = far point/plane(XY)
 Matrix perspectiveMat(float theta, float ratio, float n, float f){
-	Matrix perspect({4,4});
+	Matrix temp({4,4});
 	float tangent = tan(theta*PI/360);
-    perspect.init(
+    temp.init(
 		1/tangent,  0,              0,              0,
         0,          ratio/tangent,  0,              0,
         0,          0,              -(n+f)/(f-n),   -(2*f*n)/(f-n),
         0,          0,              -1,              0
     	);
-    return perspect;
+    return temp;
 }
 
 #endif
