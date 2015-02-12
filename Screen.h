@@ -28,7 +28,7 @@ public:
 	    int width = screen->w;
 	    int height = screen->h;
 	    int x=ROUNDOFF(xx); int y=ROUNDOFF(yy);
-	    if (x < 0 || x > width || y < 0 || y > height){
+	    if (x < 0 || x >= width || y < 0 || y >= height){
 			return;
 	    }
 	    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);

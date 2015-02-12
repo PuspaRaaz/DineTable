@@ -8,6 +8,10 @@
 #define ABS(a) ((a < 0) ? -a : a) //absolute value
 #define EQUAL(a, b) ((bool)(ABS(a - b)) <= PRECISION) //return if a and b are equal or not
 #define ROUNDOFF(a) ((int)((a < 0) ? (a - 0.5) : (a + 0.5))) //gives the rounded value of float
+#define RADIAN(a) (a * PI / 180) //equivalent radian value for provided degree angle
+#define DEGREE(a) (a * 180 / PI) //ewuivalent angle in degree for its radian value
+#define MIN(a, b) (a < b ? a : b) //minimum of two numbers
+#define MAX(a, b) (a > b ? a : b) //maximum of two numbers
 
 //color class 
 class Color

@@ -1,6 +1,7 @@
 #include "Object.h"
 #include "Time.h"
 #include "Vertex.h"
+#include "Basic.h"
 
 #include <SDL/SDL.h>
 
@@ -24,30 +25,48 @@ int main(){
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym)
                     {
-                        case SDLK_SPACE:
-                            pause = (pause)?false:true;
-                            while(pause){
-                                SDL_Event eventPaused;
-                                while(SDL_PollEvent(&eventPaused)){
-                                    switch(eventPaused.type){
-                                        case SDL_KEYDOWN:
-                                            switch (event.key.keysym.sym)
-                                            {
-                                                case SDLK_SPACE:
-                                                    pause = (pause)?false:true;
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                }
-                            }
+                        case SDLK_KP1:
+                            dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(-1));
+                            break;
+                        case SDLK_KP9:
+                            dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(1));
+                            break;
+                        case SDLK_KP8:
+                            dineTable.rotate(RADIAN(0), RADIAN(1), RADIAN(0));
+                            break;
+                        case SDLK_KP2:
+                            dineTable.rotate(RADIAN(0), RADIAN(-1), RADIAN(0));
+                            break;
+                        case SDLK_KP6:
+                            dineTable.rotate(RADIAN(1), RADIAN(0), RADIAN(0));
+                            break;
+                        case SDLK_KP4:
+                            dineTable.rotate(RADIAN(-1), RADIAN(0), RADIAN(0));
+                            break;
+                        case SDLK_KP_PLUS:
+                            dineTable.scale(1.03);
+                            break;
+                        case SDLK_KP_MINUS:
+                            dineTable.scale(0.97);
+                            break;
+                        case SDLK_RIGHT:
+                            dineTable.translate(Vertex3D(3,0,0));
+                            break;
+                        case SDLK_LEFT:
+                            dineTable.translate(Vertex3D(-3,0,0));
+                            break;
+                        case SDLK_UP:
+                            dineTable.translate(Vertex3D(0,3,0));
+                            break;
+                        case SDLK_DOWN:
+                            dineTable.translate(Vertex3D(0,-3,0));
                             break;
                     }
                     break;
             }
         }
         dineTable.draw(cam, viewPlane);
-        dineTable.rotate(0.002, 0.000, 0.000);
+        dineTable.rotate(RADIAN(1), RADIAN(0), RADIAN(0));
         timer.stop();
         uintmax_t samay = timer.time();
         float fps = 1e6 / samay;

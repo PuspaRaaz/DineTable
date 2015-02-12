@@ -17,6 +17,18 @@ Matrix translation(const Vertex3D v){
 	return temp;
 }
 
+//gives the scaling matrix to scale by a factor about origin
+Matrix scaling(float s){
+	Matrix temp({4,4});
+	temp.init(
+		s, 0, 0, 0,
+		0, s, 0, 0,
+		0, 0, s, 0,
+		0, 0, 0, 1
+		);
+	return temp;
+}
+
 //gives the matrix that rotates around x-axis
 Matrix rotateX(float theta){
 	Matrix temp({4,4});

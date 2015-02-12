@@ -1,6 +1,7 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
+#include "Vertex.h"
 #include <iostream>
 #include <string>
 
@@ -48,12 +49,20 @@ public:
 	Matrix operator+ (const Matrix&) const; //returns this + mat
 	Matrix operator- (const Matrix&) const; //returns this - mat
 	Matrix operator* (const Matrix&) const; //returns this * mat (cross-product)
+	Vertex3D operator* (Vertex3D);
 	void operator%= (const Matrix&); //returns mat * this (cross product)
 	void operator= (const Matrix&); //assignment operator overloaded
 	void displayMat(); //display matrix in row*col form
 	int giveRow(){return row;}
 	int giveCol(){return col;}
 };
+
+Vertex3D Matrix::operator*(Vertex3D v){
+	Matrix temp({4,1});
+	temp.init(v.x, v.y, v.z, 1);
+	temp = (*this) * temp;
+	return Vertex3D(temp(0), temp(1), temp(2));
+}
 
 const float& Matrix::operator() (int r, int c) const {
 	int pos = col*r + c;
