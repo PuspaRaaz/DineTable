@@ -44,13 +44,7 @@ public:
 	void rotate(float, float, float);
 	void rotateX(float);
 	void rotateY(float);
-	void rotateZ(float);/*
-	Matrix vMatrix(); //returns a single matrix of object vertices
-	Matrix vtMatrix(); //returns a single matrix of object vertex textures
-	Matrix vnMatrix(); //returns a single matrix of object vertex normals
-	Matrix fMatrix(); //returns a single matrix of object faces
-	Matrix ftMatrix(); //returns a single matrix of object face textures
-	Matrix fnMatrix(); *///returns a single matrix of object face normals
+	void rotateZ(float);
 	~Object3D(){}
 };
 

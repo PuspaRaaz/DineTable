@@ -9,7 +9,7 @@
 int main(){
     int width = 800, height = 600;
     Vertex3D cam(0,30,320), viewPlane(0,0,-1);
-    Object3D dineTable("DineT.obj");
+    Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj");
     Time timer;
     SDL_Event event;
     bool quit = false, pause = false;
