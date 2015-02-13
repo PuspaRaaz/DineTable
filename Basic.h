@@ -11,7 +11,7 @@
 #define RADIAN(a) (a * PI / 180) //equivalent radian value for provided degree angle
 #define DEGREE(a) (a * 180 / PI) //ewuivalent angle in degree for its radian value
 #define MIN(a, b) (a < b ? a : b) //minimum of two numbers
-#define MAX(a, b) (a > b ? a : b) //maximum of two numbers
+#define MAX(a, b) (a > b ? a : b) //maximum of two numbers8
 
 //color class 
 class Color

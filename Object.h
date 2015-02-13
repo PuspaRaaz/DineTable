@@ -59,7 +59,7 @@ void Object3D::translate(const Vertex3D& v){
 
 void Object3D::scale(float s){
 	Matrix temp = scaling(s);
-	for (int i = 0; i < vertexMatrix.size(); i++){
+	for (int i = 0; i < vertexMatrix.size(); i++)
 		vertexMatrix[i] = temp * vertexMatrix[i];/*
 	for (int i = 0; i < vertexNormal.size(); i++)
 		vertexNormal[i] = temp * vertexNormal[i];*/
@@ -114,24 +114,24 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
     Screen DineTable(width, height);
     float plane = 1000;
     unsigned int len = vertexMatrix.size();
-    Vertex2D v2[len];
+    Vertex3D v3[len];
     for(int i = 0; i < len; i++){
-        v2[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
+        v3[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
     }
     unsigned int t1, t2;
     len = surfaceVertex.size();
     for(unsigned int i = 0; i < len; i++){
     	t1 = surfaceVertex[i].x-1;
     	t2 = surfaceVertex[i].y-1;
-    	DineTable.line(v2[t1], v2[t2], White);
+    	DineTable.line(v3[t1], v3[t2], White);
 
     	t1 = surfaceVertex[i].y-1;
     	t2 = surfaceVertex[i].z-1;
-    	DineTable.line(v2[t1], v2[t2], White);
+    	DineTable.line(v3[t1], v3[t2], White);
 
     	t1 = surfaceVertex[i].z-1;
     	t2 = surfaceVertex[i].x-1;
-    	DineTable.line(v2[t1], v2[t2], White);
+    	DineTable.line(v3[t1], v3[t2], White);
     }
     DineTable.refresh();
     DineTable.clear();    

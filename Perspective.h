@@ -7,7 +7,7 @@
 #include "Matrix.h"
 
 //changes 3D vertex into corresponding plotable 2D vertex
-Vertex2D perspective(const Vertex3D& source, const Vertex3D& cam,
+Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 	const Vertex3D& view, float n, float f, int width, int height){
 	float theta;
 
@@ -40,9 +40,10 @@ Vertex2D perspective(const Vertex3D& source, const Vertex3D& cam,
     copy(1) = height/2 - copy(1)*height;
     copy(2) = (-copy(2)*0.5 + 0.5) * 0xffffff; //normalizing and fitting the view to screen size
 
-    Vertex2D res;
+    Vertex3D res;
     res.x = copy(0);
-    res.y = copy(1);//matrix to 2D vertex
+    res.y = copy(1);
+    res.z = copy(2);
 
     return res;//return 2D equivalent vertex of the 3D source vertex
 }
