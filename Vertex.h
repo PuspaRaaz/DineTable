@@ -24,7 +24,6 @@ public:
 	Vertex3D operator- (const Vertex3D) const; //a - b
 	Vertex3D operator* (const float) const; //a * f
 	Vertex3D operator/ (const float) const; //a / f
-	// void operator*= (const Matrix&); //mat * vertex3D
 	Vertex3D crossProduct (const Vertex3D) const; //a x b
 	float dotProduct (const Vertex3D) const; //a . b
 	float magnitude() const; //|a|
@@ -42,12 +41,6 @@ Vertex3D Vertex3D::operator* (const float f) const{
 Vertex3D Vertex3D::operator/ (const float f) const{
 	return Vertex3D(x/f, y/f, z/f);
 }
-// void Vertex3D::operator*= (const Matrix& mat){
-// 	Matrix point({mat.col(),1});
-// 	point.init(x, y, z, 1);
-// 	point %= mat;
-// 	return (Vertex3D(point(0),point(1),point(2)));
-// }
 Vertex3D Vertex3D::crossProduct (const Vertex3D vec) const{
 	return Vertex3D(y*vec.z - z*vec.y, z*vec.x - x*vec.z, x*vec.y - y*vec.x);
 }
