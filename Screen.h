@@ -44,8 +44,30 @@ public:
 	    *pixmem32 = colour;
 	}
 
+	//scanline filling algorithm. fills triangle with flat base
+	void bottomFlat(Vertex3D& a, Vertex3D& b, Vertex3D& c){
+		float invSlopeAB = (b.x - a.x) / (b.y - a.y);
+		float invSlopeAC = (c.x - a.x) / (c.y - a.y);
+		float xAB = a.x, xAC = a.x;
+		for(int i = a.y; i <= b.y; i++){
+			line(Vertex3D(xAB, i, a.z), Vertex3D(xAC, i, a.z));
+			xAB += invSlopeAB; xAC += invSlopeAC;
+		}
+	}
+
+	//scanline filling algorithm. fills triangle with flat roof
+	void topFlat(Vertex3D& a, Vertex3D& b, Vertex3D& c){
+		float invSlopeCA = (c.x - a.x) / (c.y - a.y);
+		float invSlopeCB = (c.x - b.x) / (c.y - b.y);
+		float xCA = c.x, xCB = c.x;
+		for(int i = c.y; i <= a.y; i++){
+			xCA -= invSlopeCA; xCB -= invSlopeCB;
+			line(Vertex3D(xCA, i, a.z), Vertex3D(xCB, i, a.z));
+		}
+	}
+
 	//draw line from point A to B with color C using DDA line drawing algorithm
-	void line(Vertex3D A, Vertex3D B, Color c){
+	void line(Vertex3D A, Vertex3D B, Color c = White){
 		float dx, dy, xInc, yInc, dInc;
 		float dStart = A.z, dEnd = B.z, dVal = dStart, dDepth = dStart - dEnd;
 	    int step, k = 0;

@@ -48,8 +48,41 @@ public:
 	void scale(float); //scale the object about origin by the factor supplied
 	void translate(const Vertex3D&); //translate the object by the given 3D vertex
 	void triangleFill(Vertex3D&, Vertex3D&);
+	void topFlat(Vertex3D&, Vertex3D&, Vertex3D&);
+	void bottomFlat(Vertex3D&, Vertex3D&, Vertex3D&);
+	void sortVertices(Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&);
 	~Object3D(){}
 };
+
+void Object3D::sortVertices(Vertex3D& a, Vertex3D& b, Vertex3D& c, Vertex3D& xx, Vertex3D& yy, Vertex3D& zz){
+	if(xx.y <= yy.y && xx.y <= zz.y){
+		a = xx;
+		if(yy.y <= zz.y){
+			b = yy; c = zz;
+		}
+		else{
+			b = zz; c = yy;
+		}
+	}
+	else if(yy.y <= xx.y && yy.y <= zz.y){
+		a = yy;
+		if(xx.y <= zz.y){
+			b = xx; c = zz;
+		}
+		else{
+			b = zz; c = xx;
+		}
+	}
+	else{
+		a = zz;
+		if(xx.y <= yy.y){
+			b = xx; c = yy;
+		}
+		else{
+			b = yy; c = xx;
+		}
+	}
+}
 
 void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
 	int width = 960, height = 720;
@@ -64,10 +97,25 @@ void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
     unsigned int t1, t2;
     len = surfaceVertex.size();
     for(unsigned int i = 0; i < len; i++){
-		Vertex3D a = v3[(unsigned int)surfaceVertex[i].x-1];
-		Vertex3D b = v3[(unsigned int)surfaceVertex[i].y-1];
-		Vertex3D c = v3[(unsigned int)surfaceVertex[i].z-1];
+		Vertex3D xxx = v3[(unsigned int)surfaceVertex[i].x-1];
+		Vertex3D yyy = v3[(unsigned int)surfaceVertex[i].y-1];
+		Vertex3D zzz = v3[(unsigned int)surfaceVertex[i].z-1];
 
+		Vertex3D a, b, c;
+
+		sortVertices(a,b,c,xxx,yyy,zzz);
+
+		if(b.y == c.y)
+			DineTable.bottomFlat(a,b,c); //defined in Screen.h
+		else if(a.y == b.y)
+			DineTable.topFlat(a, b, c); //defined in Screen.h
+		else{
+			float x = a.x + (b.y - a.y) / (c.y - a.y) * (c.x - a.x);
+			Vertex3D mid(x, b.y, b.z);
+			DineTable.bottomFlat(a, b, mid);
+			DineTable.topFlat(b, mid, c);
+		}
+/*
 		int maxX = MAX(a.x, MAX(b.x, c.x));
 		int minX = MIN(a.x, MIN(b.x, c.x));
 		int maxY = MAX(a.y, MAX(b.y, c.y));
@@ -86,7 +134,7 @@ void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
 				if(s>=0 && t >=0 && (s+t) <= 1)
 					DineTable.setPixel(x, y, a.z);
 			}
-		}
+		}*/
 	}
 }
 

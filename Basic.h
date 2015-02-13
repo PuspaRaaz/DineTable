@@ -13,6 +13,12 @@
 #define MIN(a, b) (a < b ? a : b) //minimum of two numbers
 #define MAX(a, b) (a > b ? a : b) //maximum of two numbers8
 
+template <class T>
+inline void SWAP(T& a, T& b){
+	T temp = a;
+	a = b;
+	b = temp;
+}
 //color class 
 class Color
 {
