@@ -22,12 +22,12 @@ public:
 	}
 
 	//pixel plot function with pixel as 2D vertex
-	void setPixel(Vertex3D v, Color c){
+	void setPixel(Vertex3D v, Color c = White){
 		setPixel(ROUNDOFF(v.x), ROUNDOFF(v.y), v.z, c);
 	}
 
 	//pixel plot with x and y supplied differently
-	void setPixel(int xx, int yy, float depth, Color c){
+	void setPixel(int xx, int yy, float depth, Color c = White){
 		int *pixmem32;
 	    int colour;
 	    int width = screen->w;

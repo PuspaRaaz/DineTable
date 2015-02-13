@@ -13,6 +13,8 @@ int main(){
     Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj");
     Time timer;
     SDL_Event event;
+    dineTable.rotate(RADIAN(90), RADIAN(0), RADIAN(0));
+
     bool quit = false, pause = false;
     while(!quit){
         timer.start();
@@ -65,7 +67,8 @@ int main(){
                     break;
             }
         }
-        dineTable.draw(cam, viewPlane);
+        // dineTable.draw(cam, viewPlane);
+        dineTable.triangleFill(cam, viewPlane);
         dineTable.rotate(RADIAN(1), RADIAN(0), RADIAN(0));
         timer.stop();
         uintmax_t samay = timer.time();

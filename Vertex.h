@@ -2,6 +2,7 @@
 #define _VERTEX_H_
 
 #include <cmath>
+#include "Basic.h"
 
 //2D vertex consisting only x and y
 class Vertex2D{
@@ -50,5 +51,17 @@ float Vertex3D::dotProduct (const Vertex3D vec) const{
 float Vertex3D::magnitude() const{
 	return sqrt(x*x + y*y + z*z);
 }
+
+class Vertex4D
+{
+public:
+	float x, y, z;
+	Color c;
+	Vertex4D(){}
+	Vertex4D(float xx, float yy, float zz, Color cc = White):x(xx), y(yy), z(zz), c(cc){}
+	Vertex4D(Vertex3D v, Color cc = White):x(v.x), y(v.y), z(v.z), c(cc){}
+	~Vertex4D(){};
+	
+};
 
 #endif

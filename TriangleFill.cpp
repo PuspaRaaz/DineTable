@@ -24,8 +24,33 @@ void setPixel(SDL_Surface* screen, int xx, int yy, float depth, Color c){
     *pixmem32 = colour;
 }
 
+//draw line from point A to B with color C using DDA line drawing algorithm
+void line(SDL_Surface* screen, Vertex3D A, Vertex3D B, Color c){
+	float dx, dy, xInc, yInc, dInc;
+	float dStart = A.z, dEnd = B.z, dVal = dStart, dDepth = dStart - dEnd;
+    int step, k = 0;
+    dx = B.x - A.x; dy = B.y - A.y;
+    if (ABS(dx) > ABS(dy)){
+        step = ABS(dx);
+        dInc = dDepth / dx;
+    }
+    else {
+    	step = ABS(dy);
+    	dInc = dDepth / dy;
+    }
+    xInc = dx/step; yInc = dy/step;
+    float x = A.x, y = A.y;
+    do
+    {
+        setPixel(screen, ROUNDOFF(x),ROUNDOFF(y), dVal,c);
+        x+= xInc; y+= yInc; dVal+= dInc;
+        k++;
+    }
+    while(k<=step);
+}
+
 void TriangleFill(SDL_Surface* screen, Vertex3D v1, Vertex3D v2, Vertex3D v3, Color c){
-		/* get the bounding box of the triangle */
+	/* get the bounding box of the triangle */
 	int maxX = MAX(v1.x, MAX(v2.x, v3.x));
 	int minX = MIN(v1.x, MIN(v2.x, v3.x));
 	int maxY = MAX(v1.y, MAX(v2.y, v3.y));
@@ -54,7 +79,13 @@ int main()
 	window = SDL_SetVideoMode(600, 480, 32, SDL_SWSURFACE);
 	for (int i = 0; i < 600*480; i++)
 		zBuffer[i] = 0xffffff;
-	TriangleFill(window, Vertex3D(100,100,100), Vertex3D(100,250,100),Vertex3D(250,250,100), Green);
+	line(window, Vertex3D(100,100,100), Vertex3D(100,250,10), Red);
+	line(window, Vertex3D(250,250,50), Vertex3D(100,250,10), Red);
+	// line(window, Vertex3D(200,150,50), Vertex3D(200,300,50),Vertex3D(350,300,50), Red);
+	// line(window, Vertex3D(250,100,100), Vertex3D(250,250,100),Vertex3D(100,100,100), Blue);
+	// line(window, Vertex3D(350,150,150), Vertex3D(350,300,150),Vertex3D(200,150,150), White);
+
+	TriangleFill(window, Vertex3D(100,100,100), Vertex3D(100,250,10),Vertex3D(250,250,50), Green);
 	TriangleFill(window, Vertex3D(200,150,50), Vertex3D(200,300,50),Vertex3D(350,300,50), Red);
 	TriangleFill(window, Vertex3D(250,100,100), Vertex3D(250,250,100),Vertex3D(100,100,100), Blue);
 	TriangleFill(window, Vertex3D(350,150,150), Vertex3D(350,300,150),Vertex3D(200,150,150), White);

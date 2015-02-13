@@ -3,6 +3,7 @@
 
 #include "Screen.h"
 #include "Vertex.h"
+#include "Basic.h"
 #include "Matrix.h"
 #include "Transformation.h"
 #include "Perspective.h"
@@ -46,8 +47,48 @@ public:
 	void rotate(float, float, float); //rotates the object about origin in three direction, alpha -> X, beta -> Y & gamma -> Z axis
 	void scale(float); //scale the object about origin by the factor supplied
 	void translate(const Vertex3D&); //translate the object by the given 3D vertex
+	void triangleFill(Vertex3D&, Vertex3D&);
 	~Object3D(){}
 };
+
+void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
+	int width = 960, height = 720;
+    SDL_WM_SetCaption("DineTable", NULL);
+    Screen DineTable(width, height);
+    float plane = 1000;
+    unsigned int len = vertexMatrix.size();
+    Vertex3D v3[len];
+    for(int i = 0; i < len; i++){
+        v3[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
+    }
+    unsigned int t1, t2;
+    len = surfaceVertex.size();
+    for(unsigned int i = 0; i < len; i++){
+		Vertex3D a = v3[(unsigned int)surfaceVertex[i].x-1];
+		Vertex3D b = v3[(unsigned int)surfaceVertex[i].y-1];
+		Vertex3D c = v3[(unsigned int)surfaceVertex[i].z-1];
+
+		int maxX = MAX(a.x, MAX(b.x, c.x));
+		int minX = MIN(a.x, MIN(b.x, c.x));
+		int maxY = MAX(a.y, MAX(b.y, c.y));
+		int minY = MIN(a.y, MIN(b.y, c.y));
+
+		Vertex2D vs1 = Vertex2D(b.x - a.x, b.y - a.y);
+		Vertex2D vs2 = Vertex2D(c.x - a.x, c.y - a.y);
+		float vs1Xvs2 = vs1.x*vs2.y - vs2.x*vs1.y;
+
+		for (int x = minX; x <= maxX; x++){
+			for (int y = minY; y <= maxY; y++){
+				Vertex2D q(x - a.x, y - a.y);
+				float s = (q.x*vs2.y - q.y*vs2.x) / vs1Xvs2;
+				float t = (vs1.x*q.y - q.x*vs1.y) / vs1Xvs2;
+
+				if(s>=0 && t >=0 && (s+t) <= 1)
+					DineTable.setPixel(x, y, a.z);
+			}
+		}
+	}
+}
 
 void Object3D::translate(const Vertex3D& v){
 	Matrix temp = translation(v);
