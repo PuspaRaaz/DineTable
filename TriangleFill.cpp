@@ -16,7 +16,7 @@ void setPixel(SDL_Surface* screen, int xx, int yy, float depth, Color c){
     if (x < 0 || x >= width || y < 0 || y >= height)
 		return;
     colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);
-	if (depth < zBuffer[x * height + y])
+	if (depth > zBuffer[x * height + y])
 		return;
 	zBuffer[x * height + y] = depth;
     y = y*screen->pitch/4;
@@ -52,10 +52,14 @@ int main()
 	SDL_Init(SDL_INIT_EVERYTHING);
 	SDL_Surface* window = NULL;
 	window = SDL_SetVideoMode(600, 480, 32, SDL_SWSURFACE);
-	TriangleFill(window, Vertex3D(100,10,100), Vertex3D(250,250,100),Vertex3D(400,100,100), White);
-	TriangleFill(window, Vertex3D(10,100,50), Vertex3D(350,150,50),Vertex3D(100,400,50), Red);
+	for (int i = 0; i < 600*480; i++)
+		zBuffer[i] = 0xffffff;
+	TriangleFill(window, Vertex3D(100,100,100), Vertex3D(100,250,100),Vertex3D(250,250,100), Green);
+	TriangleFill(window, Vertex3D(200,150,50), Vertex3D(200,300,50),Vertex3D(350,300,50), Red);
+	TriangleFill(window, Vertex3D(250,100,100), Vertex3D(250,250,100),Vertex3D(100,100,100), Blue);
+	TriangleFill(window, Vertex3D(350,150,150), Vertex3D(350,300,150),Vertex3D(200,150,150), White);
 	SDL_Flip(window);
-	SDL_Delay(5000);
+	SDL_Delay(15000);
 	SDL_Quit();
 	return 0;
 }
