@@ -8,14 +8,14 @@
 #define DELETE "\033[A\033[2K"
 
 int main(){
-    int width = 800, height = 600;
+    int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600;
     Vertex3D cam(0,30,320), viewPlane(0,0,-1);
     Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj");
     Time timer;
     SDL_Event event;
-    // dineTable.rotate(RADIAN(90), RADIAN(0), RADIAN(0));
 
     bool quit = false, pause = false;
+    dineTable.scale(0.7); dineTable.rotate(PI/8,0,0);
     while(!quit){
         timer.start();
         while(SDL_PollEvent(&event)){
@@ -23,6 +23,10 @@ int main(){
             {
                 case SDL_QUIT:
                     quit = true;
+                    break;
+                case SDL_VIDEORESIZE:
+                    SCREEN_WIDTH = event.resize.w;
+                    SCREEN_HEIGHT = event.resize.h;
                     break;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym)
@@ -52,24 +56,30 @@ int main(){
                             dineTable.scale(0.97);
                             break;
                         case SDLK_RIGHT:
-                            dineTable.translate(Vertex3D(3,0,0));
+                            // dineTable.translate(Vertex3D(3,0,0));
+                            viewPlane.x--;
                             break;
                         case SDLK_LEFT:
-                            dineTable.translate(Vertex3D(-3,0,0));
+                            // dineTable.translate(Vertex3D(-3,0,0));
+                            viewPlane.x++;
                             break;
                         case SDLK_UP:
-                            dineTable.translate(Vertex3D(0,3,0));
+                            // dineTable.translate(Vertex3D(0,3,0));
+                            viewPlane.y--;
                             break;
                         case SDLK_DOWN:
-                            dineTable.translate(Vertex3D(0,-3,0));
+                            // dineTable.translate(Vertex3D(0,-3,0));
+                            viewPlane.y++;
                             break;
                     }
                     break;
             }
         }
         // dineTable.draw(cam, viewPlane);
-        dineTable.triangleFill(cam, viewPlane);
-        dineTable.rotate(RADIAN(1), RADIAN(0), RADIAN(0));
+        dineTable.triangleFill(SCREEN_WIDTH, SCREEN_WIDTH, cam, viewPlane);
+        // dineTable.rotate(RADIAN(0), RADIAN(1), RADIAN(0));
+        // viewPlane.x--;
+        // cam.x++;
         timer.stop();
         uintmax_t samay = timer.time();
         float fps = 1e6 / samay;

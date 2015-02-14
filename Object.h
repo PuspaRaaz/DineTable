@@ -40,14 +40,14 @@ public:
 	// Object3D(){}
 	Object3D(const string&); //constructor, loads .obj file
 	void addVertex(Vertex3D&); //adds a new vertex to the vertexMatrix
-	void addSurface(Vertex3D&, Vertex3D&, Vertex3D&); //adds a new surface to the surfaceMatrix along with surface normals and surface textures
+	void addSurface(Vertex3D&, Vertex3D&, Vertex3D&); //adds a new surface to the surfaceMatrix along with its normals and textures
 	void addNormal(Vertex3D&); //adds a new vertex normal to the vertexNormal
 	void addTexture(Vertex3D&); //adds a new vertex texture to the vertexTexture
 	void draw(Vertex3D&, Vertex3D&); //draw wireframe of the object loaded considering camera and lookAt position
 	void rotate(float, float, float); //rotates the object about origin in three direction, alpha -> X, beta -> Y & gamma -> Z axis
 	void scale(float); //scale the object about origin by the factor supplied
 	void translate(const Vertex3D&); //translate the object by the given 3D vertex
-	void triangleFill(Vertex3D&, Vertex3D&);
+	void triangleFill(int, int, Vertex3D&, Vertex3D&);
 	void topFlat(Vertex3D&, Vertex3D&, Vertex3D&);
 	void bottomFlat(Vertex3D&, Vertex3D&, Vertex3D&);
 	void sortVertices(Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&);
@@ -84,7 +84,7 @@ void Object3D::sortVertices(Vertex3D& a, Vertex3D& b, Vertex3D& c, Vertex3D& xx,
 	}
 }
 
-void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
+void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
 	int width = 960, height = 720;
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
@@ -94,19 +94,38 @@ void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
     for(int i = 0; i < len; i++){
         v3[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
     }
-    unsigned int t1, t2;
     len = surfaceVertex.size();
     for(unsigned int i = 0; i < len; i++){
-		Vertex3D xxx = v3[(unsigned int)surfaceVertex[i].x-1];
-		Vertex3D yyy = v3[(unsigned int)surfaceVertex[i].y-1];
-		Vertex3D zzz = v3[(unsigned int)surfaceVertex[i].z-1];
+		unsigned int xxx = (unsigned int) surfaceVertex[i].x - 1;
+		unsigned int yyy = (unsigned int) surfaceVertex[i].y - 1;
+		unsigned int zzz = (unsigned int) surfaceVertex[i].z - 1;
+    	DineTable.line(v3[xxx], v3[yyy], White);
+    	DineTable.line(v3[yyy], v3[zzz], White);
+    	DineTable.line(v3[zzz], v3[xxx], White);
+    }
+    DineTable.refresh();
+    DineTable.clear();    
+}
+
+void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlane){
+    SDL_WM_SetCaption("DineTable", NULL);
+    Screen DineTable(width, height);
+    float plane = 1000;
+    Vertex3D v3[vertexMatrix.size()];
+    for(int i = 0; i < vertexMatrix.size(); i++){
+        v3[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
+    }
+    for(unsigned int i = 0; i < surfaceVertex.size(); i++){
+		Vertex3D xxx = v3[ (unsigned int) surfaceVertex[i].x - 1 ];
+		Vertex3D yyy = v3[ (unsigned int) surfaceVertex[i].y - 1 ];
+		Vertex3D zzz = v3[ (unsigned int) surfaceVertex[i].z - 1 ];
 
 		Vertex3D a, b, c;
 
-		sortVertices(a,b,c,xxx,yyy,zzz);
+		sortVertices(a, b, c, xxx, yyy, zzz);/*
 
 		if(b.y == c.y)
-			DineTable.bottomFlat(a,b,c); //defined in Screen.h
+			DineTable.bottomFlat(a, b, c); //defined in Screen.h
 		else if(a.y == b.y)
 			DineTable.topFlat(a, b, c); //defined in Screen.h
 		else{
@@ -114,8 +133,8 @@ void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
 			Vertex3D mid(x, b.y, b.z);
 			DineTable.bottomFlat(a, b, mid);
 			DineTable.topFlat(b, mid, c);
-		}
-/*
+		}*/
+
 		int maxX = MAX(a.x, MAX(b.x, c.x));
 		int minX = MIN(a.x, MIN(b.x, c.x));
 		int maxY = MAX(a.y, MAX(b.y, c.y));
@@ -134,8 +153,10 @@ void Object3D::triangleFill(Vertex3D& cam, Vertex3D& viewPlane){
 				if(s>=0 && t >=0 && (s+t) <= 1)
 					DineTable.setPixel(x, y, a.z);
 			}
-		}*/
+		}
 	}
+    DineTable.refresh();
+    DineTable.clear();
 }
 
 void Object3D::translate(const Vertex3D& v){
@@ -195,35 +216,6 @@ void Object3D::addSurface(Vertex3D& ver, Vertex3D& tex, Vertex3D& nor){
 	surfaceNormal.push_back(Vertex3D());
 	index = surfaceNormal.size() - 1;
 	surfaceNormal[index] = nor;
-}
-
-void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
-	int width = 960, height = 720;
-    SDL_WM_SetCaption("DineTable", NULL);
-    Screen DineTable(width, height);
-    float plane = 1000;
-    unsigned int len = vertexMatrix.size();
-    Vertex3D v3[len];
-    for(int i = 0; i < len; i++){
-        v3[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
-    }
-    unsigned int t1, t2;
-    len = surfaceVertex.size();
-    for(unsigned int i = 0; i < len; i++){
-    	t1 = surfaceVertex[i].x-1;
-    	t2 = surfaceVertex[i].y-1;
-    	DineTable.line(v3[t1], v3[t2], White);
-
-    	t1 = surfaceVertex[i].y-1;
-    	t2 = surfaceVertex[i].z-1;
-    	DineTable.line(v3[t1], v3[t2], White);
-
-    	t1 = surfaceVertex[i].z-1;
-    	t2 = surfaceVertex[i].x-1;
-    	DineTable.line(v3[t1], v3[t2], White);
-    }
-    DineTable.refresh();
-    DineTable.clear();    
 }
 
 Object3D::Object3D(const string& filename){

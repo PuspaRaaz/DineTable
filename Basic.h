@@ -14,7 +14,7 @@
 #define MAX(a, b) (a > b ? a : b) //maximum of two numbers8
 
 template <class T>
-inline void SWAP(T& a, T& b){
+inline  void SWAP(T& a, T& b){
 	T temp = a;
 	a = b;
 	b = temp;
@@ -32,7 +32,7 @@ public:
 };
 
 //predifined colors with alpha -> 255
-extern const Color White(255,255,255);
+extern const Color White(0xea,0xea,0xea);
 extern const Color Black(0, 0, 0);
 extern const Color Red(255,0,0);
 extern const Color Green(0,255,0);

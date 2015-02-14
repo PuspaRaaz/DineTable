@@ -13,6 +13,19 @@ Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 
 	Matrix translate = translation(cam*-1);//translates camera position to the origin
 
+    Vertex3D u, v(0,1,0), N;
+    N = cam - view;           N = N/N.magnitude();
+    u = v.crossProduct(N);    u = u/u.magnitude();
+    v = N.crossProduct(u);    v = v/v.magnitude();
+
+    Matrix rotation({4,4});
+    rotation.init(
+        u.x, u.y, u.z, 0,
+        v.x, v.y, v.z, 0,
+        N.x, N.y, N.z, 0,
+        0, 0, 0, 1
+        );
+
 	if(view.z > 0)
 		theta = PI - atan(view.x/view.magnitude());
 	else
@@ -27,7 +40,9 @@ Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 	float ratio = width/height;
 	Matrix perspect = perspectiveMat(95, ratio, n, f);//gives the perspective view of the object
 
-    Matrix WtoV = (((perspect * rotationX) * rotationY) * translate);//gives the CTM for all above
+    // Matrix WtoV = (((perspect * rotationX) * rotationY) * translate);//gives the CTM for all above
+
+    Matrix WtoV = ((perspect * rotation) * translate);//gives the CTM for all above
     
     Matrix copy({4,1});
     copy.init(source.x, source.y, source.z, 1);//matrix of the source vertex
