@@ -9,38 +9,34 @@ class Screen
 {
 
 	SDL_Surface* screen; //SDL_Surface
-	float* zBuffer;
+	float* zBuffer; //Z-buffer to detect visible surface (pixel)
 public:
 	Screen(const int width, const int height){
 		if((SDL_Init(SDL_INIT_EVERYTHING)) == -1) return; //initialize SDL
-		if((screen = SDL_SetVideoMode(width, height, 32, SDL_SWSURFACE | SDL_RESIZABLE)) == NULL) //set sdl videomode in software buffer and make it resizable
-			return;
+		if((screen = SDL_SetVideoMode(width, height, 32, SDL_SWSURFACE | SDL_RESIZABLE)) == NULL) return; //set sdl videomode in software buffer and make it resizable			
 		zBuffer = new float [width*height];
 		for (int i = 0; i < width*height; i++)
 			zBuffer[i] = 0xffffff;
-		// float zBuffer[width][height] = {}
 	}
 
-	//pixel plot function with pixel as 2D vertex
+	//pixel plot function with pixel as 3D vertex
 	void setPixel(Vertex3D v, Color c = White){
 		setPixel(ROUNDOFF(v.x), ROUNDOFF(v.y), v.z, c);
 	}
 
-	//pixel plot with x and y supplied differently
+	//pixel plot with x and y supplied differently considering depth
 	void setPixel(int xx, int yy, float depth, Color c = White){
 		int *pixmem32;
-	    int colour;
-	    int width = screen->w;
-	    int height = screen->h;
-	    int x=ROUNDOFF(xx); int y=ROUNDOFF(yy);
-	    if (x < 0 || x >= width || y < 0 || y >= height)
+	    int colour, width = screen->w, height = screen->h;
+	    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
+	    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
 			return;
-		if (depth > zBuffer[x * height + y])
+		if (depth > zBuffer[xx * height + yy])
 			return;
-		zBuffer[x * height + y] = depth;
+		zBuffer[xx * height + yy] = depth;
 	    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);
-	    y = y*screen->pitch/4;
-	    pixmem32 = (int*) screen->pixels+y+x;
+	    yy = yy*screen->pitch/4;
+	    pixmem32 = (int*) screen->pixels+yy+xx;
 	    *pixmem32 = colour;
 	}
 
@@ -98,7 +94,7 @@ public:
 
 	//clear the whole screen
 	void clear(){
-		SDL_FreeSurface(screen);
+		SDL_FillRect(screen, &screen->clip_rect, 0x000);
 	}
 
 	//destructor

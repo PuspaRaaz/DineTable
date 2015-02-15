@@ -9,10 +9,13 @@
 //changes 3D vertex into corresponding plotable 2D vertex
 Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 	const Vertex3D& view, float n, float f, int width, int height){
-	float theta;
+	float theta, ratio = width/height;
+    Matrix copy({4,1});
+    copy.init(source.x, source.y, source.z, 1);//matrix of the source vertex
 
 	Matrix translate = translation(cam*-1);//translates camera position to the origin
 
+    //U, V and N method for rotation
     Vertex3D u, v(0,1,0), N;
     N = cam - view;           N = N/N.magnitude();
     u = v.crossProduct(N);    u = u/u.magnitude();
@@ -25,7 +28,9 @@ Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
         N.x, N.y, N.z, 0,
         0, 0, 0, 1
         );
+    //U, V and N method ends
 
+    //general rotation method for rotation
 	if(view.z > 0)
 		theta = PI - atan(view.x/view.magnitude());
 	else
@@ -36,18 +41,18 @@ Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 	Matrix rotationX = rotateX(theta); //rotates about x axis, the camera position
     //making x and y axis of camera position symmetric with the coordinate axes makes
     //the z axis symmetric automatically
+    //general rotation method for rotation ends
 
-	float ratio = width/height;
-	Matrix perspect = perspectiveMat(95, ratio, n, f);//gives the perspective view of the object
+    Matrix perspect = perspectiveMat(95, ratio, n, f);//gives the perspective view of the object
 
-    // Matrix WtoV = (((perspect * rotationX) * rotationY) * translate);//gives the CTM for all above
+    //implementing general rotation method for rotation of camera coordinate axes to match with original geometric coordinate axes
+    Matrix WtoVGR = (((perspect * rotationX) * rotationY) * translate);//gives the CTM for all above
+    // copy %= WtoVGR;
 
-    Matrix WtoV = ((perspect * rotation) * translate);//gives the CTM for all above
-    
-    Matrix copy({4,1});
-    copy.init(source.x, source.y, source.z, 1);//matrix of the source vertex
+    //implementing U, V and N method for rotation of camera coordinate axes to match with original geometric coordinate axes
+    Matrix WtoVUVN = ((perspect * rotation) * translate);//gives the CTM for all above
+    copy %= WtoVUVN;
 
-    copy %= WtoV;
     copy(0) /= copy(3);
     copy(1) /= copy(3);
     copy(2) /= copy(3);

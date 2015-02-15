@@ -1,91 +1,48 @@
+#include "Basic.h"
 #include "Object.h"
 #include "Time.h"
 #include "Vertex.h"
-#include "Basic.h"
-
 #include <SDL/SDL.h>
 
-#define DELETE "\033[A\033[2K"
-
 int main(){
-    int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600;
-    Vertex3D cam(0,30,320), viewPlane(0,0,-1);
-    Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj");
-    Time timer;
-    SDL_Event event;
-
-    bool quit = false, pause = false;
-    dineTable.scale(0.7); dineTable.rotate(PI/8,0,0);
-    while(!quit){
-        timer.start();
-        while(SDL_PollEvent(&event)){
-            switch(event.type)
-            {
-                case SDL_QUIT:
-                    quit = true;
-                    break;
-                case SDL_VIDEORESIZE:
-                    SCREEN_WIDTH = event.resize.w;
-                    SCREEN_HEIGHT = event.resize.h;
-                    break;
-                case SDL_KEYDOWN:
-                    switch (event.key.keysym.sym)
-                    {
-                        case SDLK_KP1:
-                            dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(-1));
-                            break;
-                        case SDLK_KP9:
-                            dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(1));
-                            break;
-                        case SDLK_KP8:
-                            dineTable.rotate(RADIAN(0), RADIAN(1), RADIAN(0));
-                            break;
-                        case SDLK_KP2:
-                            dineTable.rotate(RADIAN(0), RADIAN(-1), RADIAN(0));
-                            break;
-                        case SDLK_KP6:
-                            dineTable.rotate(RADIAN(1), RADIAN(0), RADIAN(0));
-                            break;
-                        case SDLK_KP4:
-                            dineTable.rotate(RADIAN(-1), RADIAN(0), RADIAN(0));
-                            break;
-                        case SDLK_KP_PLUS:
-                            dineTable.scale(1.03);
-                            break;
-                        case SDLK_KP_MINUS:
-                            dineTable.scale(0.97);
-                            break;
-                        case SDLK_RIGHT:
-                            // dineTable.translate(Vertex3D(3,0,0));
-                            viewPlane.x--;
-                            break;
-                        case SDLK_LEFT:
-                            // dineTable.translate(Vertex3D(-3,0,0));
-                            viewPlane.x++;
-                            break;
-                        case SDLK_UP:
-                            // dineTable.translate(Vertex3D(0,3,0));
-                            viewPlane.y--;
-                            break;
-                        case SDLK_DOWN:
-                            // dineTable.translate(Vertex3D(0,-3,0));
-                            viewPlane.y++;
-                            break;
-                    }
-                    break;
+    int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600; //screeen parameters
+    Vertex3D cam(0,30,320), viewPlane(0,0,-1); //position of eye and view plane
+    Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj"); //object to be drawn
+    Time timer; //timer to measure FPS
+    SDL_Event event; //SDL event for run-time variation
+    bool quit = false; //indicator to quit the program. Quits if TRUE
+    dineTable.scale(0.7); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
+    while(!quit){ //continues until user quits the program
+        timer.start(); //timer starts as main processing starts here
+        while(SDL_PollEvent(&event)){ //executes if any external events occured
+            if(event.type == SDL_QUIT) quit = true; //if user pressed ALT+F4 on keyboard or X in titlebar, program quits
+            if(event.type == SDL_VIDEORESIZE){ //if user presses RESIZE in titlebar, screen parameters varies to the new measurements
+                SCREEN_WIDTH = event.resize.w;
+                SCREEN_HEIGHT = event.resize.h;
             }
         }
-        // dineTable.draw(cam, viewPlane);
-        dineTable.triangleFill(SCREEN_WIDTH, SCREEN_WIDTH, cam, viewPlane);
-        // dineTable.rotate(RADIAN(0), RADIAN(1), RADIAN(0));
-        // viewPlane.x--;
-        // cam.x++;
-        timer.stop();
-        uintmax_t samay = timer.time();
-        float fps = 1e6 / samay;
-        std::cout << DELETE;
-        std::cout<<"FPS :\t"<<fps<<std::endl;
+        Uint8* keys = SDL_GetKeyState(0); //get keystate for all keyboard keys
+        if (keys[SDLK_DOWN]) viewPlane.y++; //translation of the object towards -ve y-axis
+        if (keys[SDLK_LEFT]) viewPlane.x++; //translation of the object towards -ve x-axis
+        if (keys[SDLK_RIGHT]) viewPlane.x--; //translation of the object towards +ve x-axis
+        if (keys[SDLK_UP]) viewPlane.y--; //translation of the object towards +ve y-axis
+        if (keys[SDLK_a]) dineTable.rotate(RADIAN(0), RADIAN(-1), RADIAN(0)); //rotation about y-axis in anti-clockwise direction
+        if (keys[SDLK_d]) dineTable.rotate(RADIAN(0), RADIAN(1), RADIAN(0)); //rotation about y-axis in clockwise direction
+        if (keys[SDLK_e]) dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(1)); //rotation about z-axis in clockwise direction
+        if (keys[SDLK_j]) cam.z--; //zoom in (scaling s>1)
+        if (keys[SDLK_k]) cam.z++; //zoom-out (scaling s<1)
+        if (keys[SDLK_w]) dineTable.rotate(RADIAN(-1), RADIAN(0), RADIAN(0)); //rotation about x-axis in clockwise direction
+        if (keys[SDLK_x]) dineTable.rotate(RADIAN(1), RADIAN(0), RADIAN(0)); //rotation about x-axis in anti-clockwise direction
+        if (keys[SDLK_z]) dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(-1)); //rotation about z-axis in anti-clockwise direction
+        // dineTable.draw(cam, viewPlane); //draws wireframe model of the object
+        dineTable.triangleFill(SCREEN_WIDTH, SCREEN_HEIGHT, cam, viewPlane); //main draw function. implements triangle filling algorithm
+        // dineTable.rotate(RADIAN(0), RADIAN(1), RADIAN(0)); //automatic rotation about y-axis
+        timer.stop(); //timer stops as processing ends
+        uintmax_t samay = timer.time(); //get time difference
+        float fps = 1e6 / samay; //get FPS from the time difference
+        std::cout << DELETE; //deletes the latest one line
+        std::cout<<"FPS :\t"<<fps<<std::endl; //displays the fps
     }
-    SDL_Quit();
-	return 0;
+    SDL_Quit(); //ends SDL call.
+	return 0; //ends main program
 };

@@ -1,18 +1,18 @@
 #ifndef _OBJECT_H_
 #define _OBJECT_H_
 
-#include "Screen.h"
-#include "Vertex.h"
 #include "Basic.h"
 #include "Matrix.h"
-#include "Transformation.h"
 #include "Perspective.h"
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <vector>
+#include "Screen.h"
+#include "Transformation.h"
+#include "Vertex.h"
 #include <SDL/SDL.h>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
 
@@ -39,18 +39,18 @@ private:
 public:
 	// Object3D(){}
 	Object3D(const string&); //constructor, loads .obj file
-	void addVertex(Vertex3D&); //adds a new vertex to the vertexMatrix
-	void addSurface(Vertex3D&, Vertex3D&, Vertex3D&); //adds a new surface to the surfaceMatrix along with its normals and textures
 	void addNormal(Vertex3D&); //adds a new vertex normal to the vertexNormal
+	void addSurface(Vertex3D&, Vertex3D&, Vertex3D&); //adds a new surface to the surfaceMatrix along with its normals and textures
 	void addTexture(Vertex3D&); //adds a new vertex texture to the vertexTexture
+	void addVertex(Vertex3D&); //adds a new vertex to the vertexMatrix
+	void bottomFlat(Vertex3D&, Vertex3D&, Vertex3D&);
 	void draw(Vertex3D&, Vertex3D&); //draw wireframe of the object loaded considering camera and lookAt position
 	void rotate(float, float, float); //rotates the object about origin in three direction, alpha -> X, beta -> Y & gamma -> Z axis
 	void scale(float); //scale the object about origin by the factor supplied
+	void sortVertices(Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&); //sort last three vertices in ascending order according to their y value and returns through the first three arguments
+	void topFlat(Vertex3D&, Vertex3D&, Vertex3D&);
 	void translate(const Vertex3D&); //translate the object by the given 3D vertex
 	void triangleFill(int, int, Vertex3D&, Vertex3D&);
-	void topFlat(Vertex3D&, Vertex3D&, Vertex3D&);
-	void bottomFlat(Vertex3D&, Vertex3D&, Vertex3D&);
-	void sortVertices(Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&);
 	~Object3D(){}
 };
 
@@ -116,42 +116,33 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
         v3[i] = perspective(vertexMatrix[i], cam, viewPlane, 5, 10000, width, height); //pipelining
     }
     for(unsigned int i = 0; i < surfaceVertex.size(); i++){
-		Vertex3D xxx = v3[ (unsigned int) surfaceVertex[i].x - 1 ];
-		Vertex3D yyy = v3[ (unsigned int) surfaceVertex[i].y - 1 ];
-		Vertex3D zzz = v3[ (unsigned int) surfaceVertex[i].z - 1 ];
+    	//get three vertices of the surface
+		Vertex3D aa = v3[ (unsigned int) surfaceVertex[i].x - 1 ];
+		Vertex3D bb = v3[ (unsigned int) surfaceVertex[i].y - 1 ];
+		Vertex3D cc = v3[ (unsigned int) surfaceVertex[i].z - 1 ];	
 
 		Vertex3D a, b, c;
+		sortVertices(a, b, c, aa, bb, cc);
 
-		sortVertices(a, b, c, xxx, yyy, zzz);/*
-
-		if(b.y == c.y)
-			DineTable.bottomFlat(a, b, c); //defined in Screen.h
-		else if(a.y == b.y)
-			DineTable.topFlat(a, b, c); //defined in Screen.h
-		else{
-			float x = a.x + (b.y - a.y) / (c.y - a.y) * (c.x - a.x);
-			Vertex3D mid(x, b.y, b.z);
-			DineTable.bottomFlat(a, b, mid);
-			DineTable.topFlat(b, mid, c);
-		}*/
-
+		//get the smallest possible rectangle that bound the given triangle
 		int maxX = MAX(a.x, MAX(b.x, c.x));
 		int minX = MIN(a.x, MIN(b.x, c.x));
 		int maxY = MAX(a.y, MAX(b.y, c.y));
 		int minY = MIN(a.y, MIN(b.y, c.y));
 
+		//normalize the surface
 		Vertex2D vs1 = Vertex2D(b.x - a.x, b.y - a.y);
 		Vertex2D vs2 = Vertex2D(c.x - a.x, c.y - a.y);
-		float vs1Xvs2 = vs1.x*vs2.y - vs2.x*vs1.y;
+		float vs1Xvs2 = vs1.x*vs2.y - vs2.x*vs1.y; //gives the normal through cross product of AB and CA
 
 		for (int x = minX; x <= maxX; x++){
 			for (int y = minY; y <= maxY; y++){
-				Vertex2D q(x - a.x, y - a.y);
-				float s = (q.x*vs2.y - q.y*vs2.x) / vs1Xvs2;
-				float t = (vs1.x*q.y - q.x*vs1.y) / vs1Xvs2;
+				Vertex2D q(x - a.x, y - a.y); //q = {point} - a
+				float s = (q.x*vs2.y - q.y*vs2.x) / vs1Xvs2; //q x vs2 / AB x CA
+				float t = (vs1.x*q.y - q.x*vs1.y) / vs1Xvs2; //vs1 x q / AB x CA
 
-				if(s>=0 && t >=0 && (s+t) <= 1)
-					DineTable.setPixel(x, y, a.z);
+				if(s>=0 && t >=0 && (s+t) <= 1) //check if the pixel is inside the triangle or not
+					DineTable.setPixel(x, y, a.z); //if inside, plot the pixel
 			}
 		}
 	}
