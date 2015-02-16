@@ -30,7 +30,7 @@ Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
         );
     //U, V and N method ends
 
-    //general rotation method for rotation
+    //general rotation method
 	if(view.z > 0)
 		theta = PI - atan(view.x/view.magnitude());
 	else
@@ -47,11 +47,11 @@ Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 
     //implementing general rotation method for rotation of camera coordinate axes to match with original geometric coordinate axes
     Matrix WtoVGR = (((perspect * rotationX) * rotationY) * translate);//gives the CTM for all above
-    // copy %= WtoVGR;
+    copy %= WtoVGR;
 
     //implementing U, V and N method for rotation of camera coordinate axes to match with original geometric coordinate axes
     Matrix WtoVUVN = ((perspect * rotation) * translate);//gives the CTM for all above
-    copy %= WtoVUVN;
+    // copy %= WtoVUVN;
 
     copy(0) /= copy(3);
     copy(1) /= copy(3);

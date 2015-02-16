@@ -110,6 +110,12 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
 void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlane){
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
+    Color ia(0xea, 0x00, 0x00, 0xff);
+    Color id(0x00, 0xea, 0x00, 0xff);
+    Color is(0x00, 0x00, 0xea, 0xff);
+    Color ka(0.1, 0.1, 0.1);
+    Color kd(0.5, 0.5, 0.5);
+    Color ks(0.5, 0.5, 0.5);
     float plane = 1000;
     Vertex3D v3[vertexMatrix.size()];
     for(int i = 0; i < vertexMatrix.size(); i++){
@@ -122,7 +128,39 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 		Vertex3D cc = v3[ (unsigned int) surfaceVertex[i].z - 1 ];	
 
 		Vertex3D a, b, c;
+		std::vector<LightSource> light;
+		LightSource redLight({{-100, 100, 100},{200000, 0, 0}}), blueLight({{0,100,100},{0, 150350,0}}), greenLight({{0, 0, 100},{0,0,175489}});
+		light.push_back(redLight); light.push_back(blueLight); light.push_back(greenLight);
 		sortVertices(a, b, c, aa, bb, cc);
+		Vertex3D centroid((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
+		Vertex3D n = (bb-aa).crossProduct(cc-bb)*-1;
+		// Vertex3D n = vertexNormal[surfaceNormal[i].x-1];
+		float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
+
+		float intensityR = ia.r*ka.r;
+		float intensityG = ia.g*ka.g;
+		float intensityB = ia.b*ka.b;
+
+		for(int i = 0; i < light.size(); i++){
+			Vertex3D R = n*(n.dotProduct(light[i].pos))*2/(n.magnitude() * light[i].pos.magnitude()) - light[i].pos;
+
+			float costheta = (light[i].pos*1 - centroid).dotProduct(n) / ((light[i].pos*1 - centroid).magnitude() * n.magnitude());
+			if(!costheta <= 0){
+				intensityR += light[i].Intensity.r*kd.r*costheta;
+				intensityG += light[i].Intensity.g*kd.g*costheta;
+				intensityB += light[i].Intensity.b*kd.b*costheta;
+			}
+
+			costheta = R.dotProduct(n)/(R.magnitude() * n.magnitude());
+
+			if(!costheta <= 0){
+				intensityR += light[i].Intensity.r*ks.r*pow(costheta, 2);
+				intensityG += light[i].Intensity.g*ks.g*pow(costheta, 2);
+				intensityB += light[i].Intensity.b*ks.b*pow(costheta, 2);
+			}
+		}
+		// std::cout<<intensityR<<" "<<intensityG<<" "<<intensityB<<"\n";
+		Color ColorIntensity(intensityR, intensityG, intensityB);
 
 		//get the smallest possible rectangle that bound the given triangle
 		int maxX = MAX(a.x, MAX(b.x, c.x));
@@ -141,11 +179,14 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 				float s = (q.x*vs2.y - q.y*vs2.x) / vs1Xvs2; //q x vs2 / AB x CA
 				float t = (vs1.x*q.y - q.x*vs1.y) / vs1Xvs2; //vs1 x q / AB x CA
 
-				if(s>=0 && t >=0 && (s+t) <= 1) //check if the pixel is inside the triangle or not
-					DineTable.setPixel(x, y, a.z); //if inside, plot the pixel
+				if(s>=0 && t >=0 && (s+t) <= 1){ //check if the pixel is inside the triangle or not
+					float depth = -(n.x*x + n.y*y + d) / n.z;
+					DineTable.setPixel(x, y, -depth, ColorIntensity); //if inside, plot the pixel
+				}
 			}
 		}
 	}
+	// std::cout<<std::endl;
     DineTable.refresh();
     DineTable.clear();
 }

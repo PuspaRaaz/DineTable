@@ -24,12 +24,19 @@ inline  void SWAP(T& a, T& b){
 class Color
 {
 public:
-	int r, g, b, a; //variables to hold red, blue, green and alpha component of the color
+	float r, g, b, a; //variables to hold red, blue, green and alpha component of the color
 	Color():r(255), g(255), b(255), a(255){} //default is a white
-	Color(int red, int green, int blue, int alpha = 255):
+	Color(float red, float green, float blue, float alpha = 255):
 		r(red), g(green), b(blue), a(alpha){}
 	~Color(){}
 	
+};
+class Camera
+{
+public:
+	float ze, zv, phi, theta, gamma;
+	Camera():ze(-500),zv(-200),phi(0),theta(0),gamma(0){}
+	~Camera(){}	
 };
 
 //predifined colors with alpha -> 255

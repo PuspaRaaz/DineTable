@@ -29,6 +29,22 @@ public:
 	float dotProduct (const Vertex3D) const; //a . b
 	float magnitude() const; //|a|
 	~Vertex3D(){} //destructor
+
+Vertex3D toVC(const Camera& cam) const{
+	float nz = z*cos(-cam.phi) - x*sin(-cam.phi);
+	float nx = z*sin(-cam.phi) + x*cos(-cam.phi);
+	float ny = y*cos(-cam.theta) - nz*sin(-cam.theta);
+	nz = y*sin(-cam.theta) + nz*cos(-cam.theta);
+	return Vertex3D(nx, ny, nz);
+}
+Vertex3D project(const Camera& cam) const{
+	float f = (cam.ze - cam.zv) / (cam.ze - z);
+	float xp = x*f, yp = y*f;
+	return Vertex3D(xp, yp, cam.zv);
+}
+Vertex3D to2D() const{
+	return Vertex3D(x+300,y+240,z);
+}
 };
 Vertex3D Vertex3D::operator+ (const Vertex3D vec) const{
 	return Vertex3D(x+vec.x, y+vec.y, z+vec.z);
@@ -62,6 +78,14 @@ public:
 	Vertex4D(Vertex3D v, Color cc = White):x(v.x), y(v.y), z(v.z), c(cc){}
 	~Vertex4D(){};
 	
+};
+
+class LightSource{
+public:
+	Vertex3D pos;
+	Color Intensity;
+	LightSource(Vertex3D v, Color c):pos(v), Intensity(c){}
+	~LightSource(){}
 };
 
 #endif

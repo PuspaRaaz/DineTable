@@ -19,6 +19,19 @@ public:
 			zBuffer[i] = 0xffffff;
 	}
 
+	void setPixel(int xx, int yy, int depth, Uint32 color){
+		int *pixmem32, width = screen->w, height = screen->h;
+	    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
+	    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
+			return;
+		if (depth > zBuffer[xx * height + yy])
+			return;
+		zBuffer[xx * height + yy] = depth;
+	    yy = yy*screen->pitch/4;
+	    pixmem32 = (int*) screen->pixels+yy+xx;
+	    *pixmem32 = color;
+	}
+
 	//pixel plot function with pixel as 3D vertex
 	void setPixel(Vertex3D v, Color c = White){
 		setPixel(ROUNDOFF(v.x), ROUNDOFF(v.y), v.z, c);
@@ -94,7 +107,7 @@ public:
 
 	//clear the whole screen
 	void clear(){
-		SDL_FillRect(screen, &screen->clip_rect, 0x000);
+		SDL_FillRect(screen, &screen->clip_rect, 0xFF0000);
 	}
 
 	//destructor
