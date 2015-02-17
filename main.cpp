@@ -37,7 +37,7 @@ int main(){
         if (keys[SDLK_z]) dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(1)); //rotation about z-axis in anti-clockwise direction
         // dineTable.draw(cam, viewPlane); //draws wireframe model of the object
         dineTable.triangleFill(SCREEN_WIDTH, SCREEN_HEIGHT, cam, viewPlane); //main draw function. implements triangle filling algorithm
-        dineTable.rotate(RADIAN(1), RADIAN(1), RADIAN(1)); //automatic rotation about y-axis
+        // dineTable.rotate(RADIAN(1), RADIAN(1), RADIAN(1)); //automatic rotation about y-axis
         timer.stop(); //timer stops as processing ends
         uintmax_t samay = timer.time(); //get time difference
         float fps = 1e6 / samay; //get FPS from the time difference

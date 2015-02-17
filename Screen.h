@@ -9,14 +9,10 @@ class Screen
 {
 
 	SDL_Surface* screen; //SDL_Surface
-	float* zBuffer; //Z-buffer to detect visible surface (pixel)
 public:
 	Screen(const int width, const int height){
 		if((SDL_Init(SDL_INIT_EVERYTHING)) == -1) return; //initialize SDL
 		if((screen = SDL_SetVideoMode(width, height, 32, SDL_SWSURFACE | SDL_RESIZABLE)) == NULL) return; //set sdl videomode in software buffer and make it resizable			
-		zBuffer = new float [width*height];
-		for (int i = 0; i < width*height; i++)
-			zBuffer[i] = 0xffffff;
 	}
 
 	void setPixel(int xx, int yy, int depth, Uint32 color){
@@ -24,9 +20,6 @@ public:
 	    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
 	    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
 			return;
-		if (depth > zBuffer[xx * height + yy])
-			return;
-		zBuffer[xx * height + yy] = depth;
 	    yy = yy*screen->pitch/4;
 	    pixmem32 = (int*) screen->pixels+yy+xx;
 	    *pixmem32 = color;
@@ -44,9 +37,6 @@ public:
 	    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
 	    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
 			return;
-		if (depth > zBuffer[xx * height + yy])
-			return;
-		zBuffer[xx * height + yy] = depth;
 	    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);
 	    yy = yy*screen->pitch/4;
 	    pixmem32 = (int*) screen->pixels+yy+xx;
@@ -116,7 +106,6 @@ public:
 			SDL_FreeSurface(screen);
 			screen = NULL;
 		}
-		delete[] zBuffer;
 	}	
 };
 #endif

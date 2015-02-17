@@ -30,12 +30,13 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
 class Object3D
 {
 private:
+	float *depthBuffer; //stores depth values for each and every pixel within the window
+	std::vector<Vertex3D> surfaceNormal; //stores the array of vertex normals of a face
+	std::vector<Vertex3D> surfaceTexture; //stores the arrayo of vertex texture of a face
+	std::vector<Vertex3D> surfaceVertex; //stores the array of vertices of a face
 	std::vector<Vertex3D> vertexMatrix; //stores the array of vertices
 	std::vector<Vertex3D> vertexNormal; //stores the array of vertex normals
 	std::vector<Vertex3D> vertexTexture; //stores the array of vertex textures
-	std::vector<Vertex3D> surfaceVertex; //stores the array of vertices of a face
-	std::vector<Vertex3D> surfaceNormal; //stores the array of vertex normals of a face
-	std::vector<Vertex3D> surfaceTexture; //stores the arrayo of vertex texture of a face
 public:
 	// Object3D(){}
 	Object3D(const string&); //constructor, loads .obj file
@@ -44,6 +45,7 @@ public:
 	void addTexture(Vertex3D&); //adds a new vertex texture to the vertexTexture
 	void addVertex(Vertex3D&); //adds a new vertex to the vertexMatrix
 	void bottomFlat(Vertex3D&, Vertex3D&, Vertex3D&);
+	void clearDepthBuffer(const int, const int); //resets the depth buffer to possible maximum value
 	void draw(Vertex3D&, Vertex3D&); //draw wireframe of the object loaded considering camera and lookAt position
 	void rotate(float, float, float); //rotates the object about origin in three direction, alpha -> X, beta -> Y & gamma -> Z axis
 	void scale(float); //scale the object about origin by the factor supplied
@@ -51,8 +53,16 @@ public:
 	void topFlat(Vertex3D&, Vertex3D&, Vertex3D&);
 	void translate(const Vertex3D&); //translate the object by the given 3D vertex
 	void triangleFill(int, int, Vertex3D&, Vertex3D&);
-	~Object3D(){}
+	~Object3D(){
+		delete[] depthBuffer;
+	}
 };
+
+void Object3D::clearDepthBuffer(const int w, const int h){
+	if(depthBuffer) delete[] depthBuffer;
+	depthBuffer = new float[w * h];
+	for (int i = 0; i < w*h; i++) depthBuffer[i] = 0xffffff;
+}
 
 void Object3D::sortVertices(Vertex3D& a, Vertex3D& b, Vertex3D& c, Vertex3D& xx, Vertex3D& yy, Vertex3D& zz){
 	if(xx.y <= yy.y && xx.y <= zz.y){
@@ -110,10 +120,8 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
 void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlane){
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
-    Color ia(0xea, 0x00, 0x00, 0xff);
-    Color ks(0.1, 0.1, 0.1);
-    Color kd(0.5, 0.5, 0.5);
-    Color ka(0.5, 0.5, 0.5);
+    clearDepthBuffer(width, height);
+    Color ia(0xea, 0x00, 0x00, 0xff), ks(0.1, 0.1, 0.1), kd(0.5, 0.5, 0.5), ka(0.5, 0.5, 0.5);
     float plane = 1000;
     Vertex3D v3[vertexMatrix.size()];
     for(int i = 0; i < vertexMatrix.size(); i++){
@@ -132,8 +140,8 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 		sortVertices(a, b, c, aa, bb, cc);
 		Vertex3D centroid((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
 		Vertex3D n = (bb-aa).crossProduct(cc-bb)*-1;
-		if (n.z <= 0) continue;
 		// Vertex3D n = vertexNormal[surfaceNormal[i].x-1]*-1;
+		if (n.z <= 0) continue;
 		float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
 
 		float intensityR = ia.r*ka.r;
@@ -168,8 +176,7 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 		int minY = MIN(a.y, MIN(b.y, c.y));
 
 		//normalize the surface
-		Vertex2D vs1 = Vertex2D(b.x - a.x, b.y - a.y);
-		Vertex2D vs2 = Vertex2D(c.x - a.x, c.y - a.y);
+		Vertex2D vs1(b.x - a.x, b.y - a.y), vs2(c.x - a.x, c.y - a.y);
 		float vs1Xvs2 = vs1.x*vs2.y - vs2.x*vs1.y; //gives the normal through cross product of AB and CA
 
 		for (int x = minX; x <= maxX; x++){
@@ -180,6 +187,7 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 
 				if(s>=0 && t >=0 && (s+t) <= 1){ //check if the pixel is inside the triangle or not
 					float depth = -(n.x*x + n.y*y + d) / n.z;
+					if(depth > depthBuffer[x*height + y]) continue;
 					DineTable.setPixel(x, y, -depth, ColorIntensity); //if inside, plot the pixel
 				}
 			}
