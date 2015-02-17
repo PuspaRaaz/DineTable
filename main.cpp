@@ -12,7 +12,7 @@ int main(){
     Time timer; //timer to measure FPS
     SDL_Event event; //SDL event for run-time variation
     bool quit = false; //indicator to quit the program. Quits if TRUE
-    dineTable.scale(0.7); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
+    // dineTable.scale(0.7); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
     while(!quit){ //continues until user quits the program
         timer.start(); //timer starts as main processing starts here
         while(SDL_PollEvent(&event)){ //executes if any external events occured
@@ -37,7 +37,7 @@ int main(){
         if (keys[SDLK_z]) dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(1)); //rotation about z-axis in anti-clockwise direction
         // dineTable.draw(cam, viewPlane); //draws wireframe model of the object
         dineTable.triangleFill(SCREEN_WIDTH, SCREEN_HEIGHT, cam, viewPlane); //main draw function. implements triangle filling algorithm
-        dineTable.rotate(RADIAN(3), RADIAN(3), RADIAN(3)); //automatic rotation about y-axis
+        dineTable.rotate(RADIAN(1), RADIAN(1), RADIAN(1)); //automatic rotation about y-axis
         timer.stop(); //timer stops as processing ends
         uintmax_t samay = timer.time(); //get time difference
         float fps = 1e6 / samay; //get FPS from the time difference

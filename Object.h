@@ -111,11 +111,9 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
     Color ia(0xea, 0x00, 0x00, 0xff);
-    Color id(0x00, 0xea, 0x00, 0xff);
-    Color is(0x00, 0x00, 0xea, 0xff);
-    Color ka(0.1, 0.1, 0.1);
+    Color ks(0.1, 0.1, 0.1);
     Color kd(0.5, 0.5, 0.5);
-    Color ks(0.5, 0.5, 0.5);
+    Color ka(0.5, 0.5, 0.5);
     float plane = 1000;
     Vertex3D v3[vertexMatrix.size()];
     for(int i = 0; i < vertexMatrix.size(); i++){
@@ -129,12 +127,13 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 
 		Vertex3D a, b, c;
 		std::vector<LightSource> light;
-		LightSource redLight({{-100, 100, 100},{200000, 0, 0}}), blueLight({{0,100,100},{0, 150350,0}}), greenLight({{0, 0, 100},{0,0,175489}});
+		LightSource redLight({{100, 100, 200},{200000, 0, 0}}), blueLight({{0,100,10},{0, 150350,0}}), greenLight({{400, 800, 200},{0,0,175489}});
 		light.push_back(redLight); light.push_back(blueLight); light.push_back(greenLight);
 		sortVertices(a, b, c, aa, bb, cc);
 		Vertex3D centroid((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
 		Vertex3D n = (bb-aa).crossProduct(cc-bb)*-1;
-		// Vertex3D n = vertexNormal[surfaceNormal[i].x-1];
+		if (n.z <= 0) continue;
+		// Vertex3D n = vertexNormal[surfaceNormal[i].x-1]*-1;
 		float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
 
 		float intensityR = ia.r*ka.r;
