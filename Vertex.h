@@ -7,10 +7,10 @@
 //2D vertex consisting only x and y
 class Vertex2D{
 public:
-	float x, y;
 	Vertex2D():x(0), y(0){}
-	Vertex2D(int xx, int yy):x(xx), y(yy){}
 	Vertex2D(const Vertex2D& v):x(v.x),y(v.y){}
+	Vertex2D(int xx, int yy):x(xx), y(yy){}
+	float x, y;
 	~Vertex2D(){};
 };
 
@@ -18,34 +18,22 @@ public:
 class Vertex3D
 {
 public:
-	float x, y, z;
-	Vertex3D(){}
-	Vertex3D(float xx, float yy, float zz):x(xx), y(yy), z(zz){}
+	Vertex3D crossProduct (const Vertex3D) const; //a x b
+	Vertex3D operator* (const float) const; //a * f
 	Vertex3D operator+ (const Vertex3D) const; //a + b
 	Vertex3D operator- (const Vertex3D) const; //a - b
-	Vertex3D operator* (const float) const; //a * f
 	Vertex3D operator/ (const float) const; //a / f
-	Vertex3D crossProduct (const Vertex3D) const; //a x b
+	Vertex3D():x(0), y(0), z(0){}
+	Vertex3D(float xx, float yy, float zz):x(xx), y(yy), z(zz){}
+	float cosine(const Vertex3D&) const; //costheta between two vectors
 	float dotProduct (const Vertex3D) const; //a . b
 	float magnitude() const; //|a|
+	float x, y, z;
 	~Vertex3D(){} //destructor
-
-Vertex3D toVC(const Camera& cam) const{
-	float nz = z*cos(-cam.phi) - x*sin(-cam.phi);
-	float nx = z*sin(-cam.phi) + x*cos(-cam.phi);
-	float ny = y*cos(-cam.theta) - nz*sin(-cam.theta);
-	nz = y*sin(-cam.theta) + nz*cos(-cam.theta);
-	return Vertex3D(nx, ny, nz);
-}
-Vertex3D project(const Camera& cam) const{
-	float f = (cam.ze - cam.zv) / (cam.ze - z);
-	float xp = x*f, yp = y*f;
-	return Vertex3D(xp, yp, cam.zv);
-}
-Vertex3D to2D() const{
-	return Vertex3D(x+300,y+240,z);
-}
 };
+float Vertex3D::cosine(const Vertex3D& v) const{
+	return ((*this).dotProduct(v) / ((*this).magnitude() * v.magnitude()));
+}
 Vertex3D Vertex3D::operator+ (const Vertex3D vec) const{
 	return Vertex3D(x+vec.x, y+vec.y, z+vec.z);
 }
@@ -67,18 +55,6 @@ float Vertex3D::dotProduct (const Vertex3D vec) const{
 float Vertex3D::magnitude() const{
 	return sqrt(x*x + y*y + z*z);
 }
-
-class Vertex4D
-{
-public:
-	float x, y, z;
-	Color c;
-	Vertex4D(){}
-	Vertex4D(float xx, float yy, float zz, Color cc = White):x(xx), y(yy), z(zz), c(cc){}
-	Vertex4D(Vertex3D v, Color cc = White):x(v.x), y(v.y), z(v.z), c(cc){}
-	~Vertex4D(){};
-	
-};
 
 class LightSource{
 public:

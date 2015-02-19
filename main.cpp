@@ -12,7 +12,7 @@ int main(){
     Time timer; //timer to measure FPS
     SDL_Event event; //SDL event for run-time variation
     bool quit = false; //indicator to quit the program. Quits if TRUE
-    // dineTable.scale(0.7); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
+    dineTable.scale(0.7); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
     while(!quit){ //continues until user quits the program
         timer.start(); //timer starts as main processing starts here
         while(SDL_PollEvent(&event)){ //executes if any external events occured

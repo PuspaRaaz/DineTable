@@ -5,7 +5,6 @@
 
 #define ABS(a) ((a < 0) ? -a : a) //absolute value
 #define DEGREE(a) (a * 180 / PI) //equivalent angle in degree for its radian value
-#define DELETE "\033[A\033[2K" //character to delete one line from output
 #define EQUAL(a, b) ((bool)(ABS(a - b)) <= PRECISION) //return if a and b are equal or not
 #define MAX(a, b) (a > b ? a : b) //maximum of two numbers
 #define MIN(a, b) (a < b ? a : b) //minimum of two numbers
@@ -30,13 +29,6 @@ public:
 		r(red), g(green), b(blue), a(alpha){}
 	~Color(){}
 	
-};
-class Camera
-{
-public:
-	float ze, zv, phi, theta, gamma;
-	Camera():ze(-500),zv(-200),phi(0),theta(0),gamma(0){}
-	~Camera(){}	
 };
 
 //predifined colors with alpha -> 255
