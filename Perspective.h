@@ -9,6 +9,7 @@
 //changes 3D vertex into corresponding plotable 2D vertex
 Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 	const Vertex3D& view, float n, float f, int width, int height){
+
 	float theta, ratio = width/height;
     Matrix copy({4,1});
     copy.init(source.x, source.y, source.z, 1);//matrix of the source vertex
@@ -39,8 +40,7 @@ Vertex3D perspective(const Vertex3D& source, const Vertex3D& cam,
 
 	theta = -atan(view.y/sqrt(view.x*view.x + view.z*view.z));
 	Matrix rotationX = rotateX(theta); //rotates about x axis, the camera position
-    //making x and y axis of camera position symmetric with the coordinate axes makes
-    //the z axis symmetric automatically
+    //making x and y axis of camera position symmetric with the coordinate axes makes the z axis symmetric automatically
     //general rotation method for rotation ends
 
     Matrix perspect = perspectiveMat(95, ratio, n, f);//gives the perspective view of the object

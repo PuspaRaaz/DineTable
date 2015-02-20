@@ -5,22 +5,13 @@
 
 class Time {
     private:
-        timeval suru,antya;
         bool isRunning;
-
-    public:
-        // Constructor
-        Time();
-
-        // Start the benchmark
-        inline void start();
-
-        // Stop the benchmark
-        inline void stop();
-
-        // Return the difference between start time
-        // and stop time in micro seconds
-        inline uintmax_t time();
+        timeval suru,antya;
+    public:        
+        Time(); // Constructor
+        inline uintmax_t time(); // Return the difference between start time and stop time in micro seconds
+        inline void start(); // Start the benchmark
+        inline void stop(); // Stop the benchmark
 };
 
 
@@ -43,8 +34,7 @@ inline void Time::stop() {
     }
 }
 
-// Return the difference between start time
-// and stop time in micro seconds
+// Return the difference between start time and stop time in micro seconds
 inline uintmax_t Time::time() {
     return (antya.tv_sec * 1e6 + antya.tv_usec - suru.tv_sec * 1e6 - suru.tv_usec);
 }

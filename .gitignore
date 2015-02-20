@@ -2,6 +2,8 @@ DineTable
 fill
 a.out
 TriangleFill.cpp
+test.cpp
+test.h
 .DS_Store
 Thumbs.db
 .*.swp

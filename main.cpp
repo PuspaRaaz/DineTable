@@ -1,17 +1,17 @@
+#define DELETE "\033[A\033[2K" //character to delete one line from output
 #include "Basic.h"
 #include "Object.h"
 #include "Time.h"
 #include "Vertex.h"
 #include <SDL/SDL.h>
-#define DELETE "\033[A\033[2K" //character to delete one line from output
 
 int main(){
     int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600; //screeen parameters
+    bool quit = false; //indicator to quit the program. Quits if TRUE
     Vertex3D cam(0,30,320), viewPlane(0,0,-1); //position of eye and view plane
-    Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj"); //object to be drawn
     Time timer; //timer to measure FPS
     SDL_Event event; //SDL event for run-time variation
-    bool quit = false; //indicator to quit the program. Quits if TRUE
+    Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj"); //object to be drawn
     dineTable.scale(0.7); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
     while(!quit){ //continues until user quits the program
         timer.start(); //timer starts as main processing starts here

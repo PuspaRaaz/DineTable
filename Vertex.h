@@ -31,8 +31,11 @@ public:
 	float x, y, z;
 	~Vertex3D(){} //destructor
 };
-float Vertex3D::cosine(const Vertex3D& v) const{
-	return ((*this).dotProduct(v) / ((*this).magnitude() * v.magnitude()));
+Vertex3D Vertex3D::crossProduct (const Vertex3D vec) const{
+	return Vertex3D(y*vec.z - z*vec.y, z*vec.x - x*vec.z, x*vec.y - y*vec.x);
+}
+Vertex3D Vertex3D::operator* (const float f) const{
+	return Vertex3D(x*f, y*f, z*f);
 }
 Vertex3D Vertex3D::operator+ (const Vertex3D vec) const{
 	return Vertex3D(x+vec.x, y+vec.y, z+vec.z);
@@ -40,14 +43,11 @@ Vertex3D Vertex3D::operator+ (const Vertex3D vec) const{
 Vertex3D Vertex3D::operator- (const Vertex3D vec) const{
 	return Vertex3D(x-vec.x, y-vec.y, z-vec.z);
 }
-Vertex3D Vertex3D::operator* (const float f) const{
-	return Vertex3D(x*f, y*f, z*f);
-}
 Vertex3D Vertex3D::operator/ (const float f) const{
 	return Vertex3D(x/f, y/f, z/f);
 }
-Vertex3D Vertex3D::crossProduct (const Vertex3D vec) const{
-	return Vertex3D(y*vec.z - z*vec.y, z*vec.x - x*vec.z, x*vec.y - y*vec.x);
+float Vertex3D::cosine(const Vertex3D& v) const{
+	return ((*this).dotProduct(v) / ((*this).magnitude() * v.magnitude()));
 }
 float Vertex3D::dotProduct (const Vertex3D vec) const{
 	return (x*vec.x + y*vec.y + z*vec.z);
@@ -58,8 +58,8 @@ float Vertex3D::magnitude() const{
 
 class LightSource{
 public:
-	Vertex3D pos;
 	Color Intensity;
+	Vertex3D pos;
 	LightSource(Vertex3D v, Color c):pos(v), Intensity(c){}
 	~LightSource(){}
 };

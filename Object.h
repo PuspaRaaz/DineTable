@@ -105,25 +105,26 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 
 		Vertex3D a, b, c;
 		std::vector<LightSource> light;
-		LightSource redLight({{100, 100, 50},{0xbada55, 0, 0}}), greenLight({{0,100,50},{0, 0xbada55,0}}), blueLight({{400, 800, 50},{0,0,0xbada55}});
-		light.push_back(redLight); light.push_back(blueLight); light.push_back(greenLight);
+		LightSource redLight({{1000, -1000, 150},{0xbada55, 0xbada55, 0xbada55}}), greenLight({{0,100,50},{0xbada55, 0xbada55,0xbada55}}), blueLight({{400, 800, 50},{0xbada55,0xbada55,0xbada55}});
+		light.push_back(redLight);// light.push_back(blueLight); light.push_back(greenLight);
 		sortVertices(a, b, c, aa, bb, cc);
+
 		Vertex3D centroid((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
 		Vertex3D n = (bb-aa).crossProduct(cc-bb)*-1;
 		if (n.z <= 0) continue;
 		float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
-
+		
 		float intensityR = ia.r*ka.r, intensityG = ia.g*ka.g, intensityB = ia.b*ka.b;
 
 		for(int i = 0; i < light.size(); i++){
 			Vertex3D R = n*(n.dotProduct(light[i].pos))*2/(n.magnitude() * light[i].pos.magnitude()) - light[i].pos;
+			float costheta = (light[i].pos ).cosine(n);
 
-			float costheta = (light[i].pos - centroid).cosine(n);
-			// if(!costheta <= 0){
-			// 	intensityR += light[i].Intensity.r*kd.r*costheta;
-			// 	intensityG += light[i].Intensity.g*kd.g*costheta;
-			// 	intensityB += light[i].Intensity.b*kd.b*costheta;
-			// }
+			if(!costheta <= 0){
+				intensityR += light[i].Intensity.r*kd.r*costheta;
+				intensityG += light[i].Intensity.g*kd.g*costheta;
+				intensityB += light[i].Intensity.b*kd.b*costheta;
+			}
 
 			costheta = R.cosine(cam);
 			if(!costheta <= 0){

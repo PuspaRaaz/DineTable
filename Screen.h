@@ -12,12 +12,12 @@ class Screen
 	float* zBuffer; //Z-buffer to detect visible surface (pixel)
 public:
 	Screen(const int, const int);
-	void setPixel(int, int, int, Uint32);
-	void setPixel(Vertex3D, Color);
-	void setPixel(int, int, float, Color);
+	void clear();
 	void line(Vertex3D, Vertex3D, Color);
 	void refresh();
-	void clear();
+	void setPixel(Vertex3D, Color);
+	void setPixel(int, int, float, Color);
+	void setPixel(int, int, int, Uint32);
 	~Screen(){ ////destructor
 		if(screen){
 			SDL_FreeSurface(screen);
@@ -35,38 +35,9 @@ Screen::Screen(const int width, const int height){
 		zBuffer[i] = 0xffffff;
 }
 
-void Screen::setPixel(int xx, int yy, int depth, Uint32 color){
-	int *pixmem32, width = screen->w, height = screen->h;
-    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
-    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
-		return;
-	if (depth > zBuffer[xx * height + yy])
-		return;
-	zBuffer[xx * height + yy] = depth;
-    yy = yy*screen->pitch/4;
-    pixmem32 = (int*) screen->pixels+yy+xx;
-    *pixmem32 = color;
-}
-
-//pixel plot function with pixel as 3D vertex
-void Screen::setPixel(Vertex3D v, Color c = White){
-	setPixel(ROUNDOFF(v.x), ROUNDOFF(v.y), v.z, c);
-}
-
-//pixel plot with x and y supplied differently considering depth
-void Screen::setPixel(int xx, int yy, float depth, Color c = White){
-	int *pixmem32;
-    int colour, width = screen->w, height = screen->h;
-    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
-    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
-		return;
-	if (depth > zBuffer[xx * height + yy])
-		return;
-	zBuffer[xx * height + yy] = depth;
-    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);
-    yy = yy*screen->pitch/4;
-    pixmem32 = (int*) screen->pixels+yy+xx;
-    *pixmem32 = colour;
+//clear the whole screen
+void Screen::clear(){
+	SDL_FillRect(screen, &screen->clip_rect, 0xFF0000);
 }
 
 //draw line from point A to B with color C using DDA line drawing algorithm
@@ -99,9 +70,38 @@ void Screen::refresh(){
 	SDL_Flip(screen);
 }
 
-//clear the whole screen
-void Screen::clear(){
-	SDL_FillRect(screen, &screen->clip_rect, 0xFF0000);
+//pixel plot function with pixel as 3D vertex
+void Screen::setPixel(Vertex3D v, Color c = White){
+	setPixel(ROUNDOFF(v.x), ROUNDOFF(v.y), v.z, c);
+}
+
+//pixel plot with x and y supplied differently considering depth
+void Screen::setPixel(int xx, int yy, float depth, Color c = White){
+	int *pixmem32;
+    int colour, width = screen->w, height = screen->h;
+    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
+    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
+		return;
+	if (depth > zBuffer[xx * height + yy])
+		return;
+	zBuffer[xx * height + yy] = depth;
+    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);
+    yy = yy*screen->pitch/4;
+    pixmem32 = (int*) screen->pixels+yy+xx;
+    *pixmem32 = colour;
+}
+
+void Screen::setPixel(int xx, int yy, int depth, Uint32 color){
+	int *pixmem32, width = screen->w, height = screen->h;
+    xx=ROUNDOFF(xx); yy=ROUNDOFF(yy);
+    if (xx < 0 || xx >= width || yy < 0 || yy >= height)
+		return;
+	if (depth > zBuffer[xx * height + yy])
+		return;
+	zBuffer[xx * height + yy] = depth;
+    yy = yy*screen->pitch/4;
+    pixmem32 = (int*) screen->pixels+yy+xx;
+    *pixmem32 = color;
 }
 
 #endif

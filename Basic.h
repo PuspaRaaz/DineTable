@@ -24,14 +24,14 @@ class Color
 {
 public:
 	float r, g, b, a; //variables to hold red, blue, green and alpha component of the color
-	Color():r(255), g(255), b(255), a(255){} //default is a white
-	Color(float red, float green, float blue, float alpha = 255):
+	Color():r(0xff), g(0xff), b(0xff), a(0xff){} //default is a white
+	Color(float red, float green, float blue, float alpha = 0xff):
 		r(red), g(green), b(blue), a(alpha){}
 	~Color(){}
 	
 };
 
-//predifined colors with alpha -> 255
+//predifined colors with alpha -> 0xff
 extern const Color Black(0, 0, 0, 0xff);
 extern const Color Blue(0, 0, 0xff, 0xff);
 extern const Color Green(0, 0xff, 0, 0xff);
