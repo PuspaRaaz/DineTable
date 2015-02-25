@@ -2,22 +2,23 @@
 #include "Basic.h"
 #include "Object.h"
 #include "Time.h"
+#include "Transformation.h"
 #include "Vertex.h"
 #include <SDL/SDL.h>
 
 int main(){
     int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600; //screeen parameters
     bool quit = false; //indicator to quit the program. Quits if TRUE
-    Vertex3D cam(0,30,320), viewPlane(0,0,-1); //position of eye and view plane
+    Vertex3D cam(0,60,320), viewPlane(0,0,-1); //position of eye and view plane
     Time timer; //timer to measure FPS
     SDL_Event event; //SDL event for run-time variation
     Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj"); //object to be drawn
-    dineTable.scale(0.7); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
+    dineTable.scale(0.7); dineTable.rotate(0,PI/2,0); dineTable.rotate(PI/8,0,0); // initial scaling and rotation of object for perfect viewing and FPS (optional)
     while(!quit){ //continues until user quits the program
         timer.start(); //timer starts as main processing starts here
         while(SDL_PollEvent(&event)){ //executes if any external events occured
             if(event.type == SDL_QUIT) quit = true; //if user pressed ALT+F4 on keyboard or X in titlebar, program quits
-            if(event.type == SDL_VIDEORESIZE){ //if user presses RESIZE in titlebar, screen parameters varies to the new measurements
+            if(event.type == SDL_VIDEORESIZE){ //if user RESIZE the screen, screen parameters varies to the new measurements
                 SCREEN_WIDTH = event.resize.w;
                 SCREEN_HEIGHT = event.resize.h;
             }
@@ -37,7 +38,10 @@ int main(){
         if (keys[SDLK_z]) dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(1)); //rotation about z-axis in anti-clockwise direction
         // dineTable.draw(cam, viewPlane); //draws wireframe model of the object
         dineTable.triangleFill(SCREEN_WIDTH, SCREEN_HEIGHT, cam, viewPlane); //main draw function. implements triangle filling algorithm
+
+        // cam = (rotateZ(RADIAN(0)) * rotateY(RADIAN(0.1)) * rotateX(RADIAN(0))) * cam;
         // dineTable.rotate(RADIAN(1), RADIAN(1), RADIAN(1)); //automatic rotation about y-axis
+
         timer.stop(); //timer stops as processing ends
         uintmax_t samay = timer.time(); //get time difference
         float fps = 1e6 / samay; //get FPS from the time difference

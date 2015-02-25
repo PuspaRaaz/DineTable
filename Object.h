@@ -26,7 +26,6 @@ void replaceAll(std::string& str, const std::string& from, const std::string& to
     }
 }
 
-
 class Object3D
 {
 private:
@@ -69,7 +68,6 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
 	int width = 960, height = 720;
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
-    float plane = 1000;
     unsigned int len = vertexMatrix.size();
     Vertex3D v3[len];
     for(int i = 0; i < len; i++){
@@ -91,8 +89,8 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
 void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlane){
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
-    Color ia(0xea, 0x00, 0x00, 0xff), ks(0.1, 0.1, 0.1), kd(0.5, 0.5, 0.5), ka(0.5, 0.5, 0.5);
-    float plane = 1000, near = 5, far = 0xffffff;
+    Color ia(0xff, 0xff, 0xff, 0xff), ks(0.1, 0.1, 0.1), kd(0.5, 0.5, 0.5), ka(0.5, 0.5, 0.5);
+    float near = 5, far = 0xffffff;
     Vertex3D v3[vertexMatrix.size()];
     for(int i = 0; i < vertexMatrix.size(); i++){
         v3[i] = perspective(vertexMatrix[i], cam, viewPlane, near, far, width, height); //conversion to device coordinate
@@ -105,8 +103,8 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 
 		Vertex3D a, b, c;
 		std::vector<LightSource> light;
-		LightSource redLight({{1000, -1000, 150},{0xbada55, 0xbada55, 0xbada55}}), greenLight({{0,100,50},{0xbada55, 0xbada55,0xbada55}}), blueLight({{400, 800, 50},{0xbada55,0xbada55,0xbada55}});
-		light.push_back(redLight);// light.push_back(blueLight); light.push_back(greenLight);
+		LightSource redLight({{10, -100, 50},{0xea, 0, 0}}), greenLight({{30,-10,50},{0, 0xea,0}}), blueLight({{40, -80, 50},{0,0,0xea}});
+		light.push_back(redLight); light.push_back(blueLight); light.push_back(greenLight);
 		sortVertices(a, b, c, aa, bb, cc);
 
 		Vertex3D centroid((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
@@ -117,17 +115,17 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 		float intensityR = ia.r*ka.r, intensityG = ia.g*ka.g, intensityB = ia.b*ka.b;
 
 		for(int i = 0; i < light.size(); i++){
-			Vertex3D R = n*(n.dotProduct(light[i].pos))*2/(n.magnitude() * light[i].pos.magnitude()) - light[i].pos;
-			float costheta = (light[i].pos ).cosine(n);
+			Vertex3D R = n*(n.dotProduct(light[i].pos - centroid))*2/(n.magnitude() * (light[i].pos - centroid).magnitude()) - light[i].pos;
+			float costheta = (light[i].pos).cosine(n);
 
-			if(!costheta <= 0){
+			if(costheta > 0){
 				intensityR += light[i].Intensity.r*kd.r*costheta;
 				intensityG += light[i].Intensity.g*kd.g*costheta;
 				intensityB += light[i].Intensity.b*kd.b*costheta;
 			}
 
 			costheta = R.cosine(cam);
-			if(!costheta <= 0){
+			if(costheta > 0){
 				intensityR += light[i].Intensity.r*ks.r*pow(costheta, 2);
 				intensityG += light[i].Intensity.g*ks.g*pow(costheta, 2);
 				intensityB += light[i].Intensity.b*ks.b*pow(costheta, 2);
@@ -173,16 +171,16 @@ void Object3D::translate(const Vertex3D& v){
 void Object3D::scale(float s){
 	Matrix temp = scaling(s);
 	for (int i = 0; i < vertexMatrix.size(); i++)
-		vertexMatrix[i] = temp * vertexMatrix[i];/*
+		vertexMatrix[i] = temp * vertexMatrix[i];
 	for (int i = 0; i < vertexNormal.size(); i++)
-		vertexNormal[i] = temp * vertexNormal[i];*/
+		vertexNormal[i] = temp * vertexNormal[i];
 }
 
 void Object3D::rotate(float alpha, float beta, float gamma){
 	Matrix RinX = rotateX(alpha);
 	Matrix RinY = rotateY(beta);
 	Matrix RinZ = rotateZ(gamma);
-	Matrix temp = (RinZ * RinY) * RinX;
+	Matrix temp = RinZ * RinY * RinX;
 	for (int i = 0; i < vertexMatrix.size(); i++)
 		vertexMatrix[i] = temp * vertexMatrix[i];
 	for (int i = 0; i < vertexNormal.size(); i++)

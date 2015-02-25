@@ -24,8 +24,14 @@ void line(SDL_Surface* screen, Vertex3D A, Vertex3D B, Color c){
 	float dStart = A.z, dEnd = B.z, dVal = dStart, dDepth = dStart - dEnd;
     int step, k = 0;
     dx = B.x - A.x; dy = B.y - A.y;
-    if (ABS(dx) > ABS(dy)){        step = ABS(dx);        dInc = dDepth / dx;   }
-    else {    	step = ABS(dy);    	dInc = dDepth / dy;    }
+    if (ABS(dx) > ABS(dy)){
+    	step = ABS(dx);
+    	dInc = dDepth / dx;
+    }
+    else {
+    	step = ABS(dy);
+    	dInc = dDepth / dy;
+    }
     xInc = dx/step; yInc = dy/step;
     float x = A.x, y = A.y;
     do{   setPixel(screen, ROUNDOFF(x),ROUNDOFF(y), dVal,c);  x+= xInc; y+= yInc; dVal+= dInc;    k++;    }
