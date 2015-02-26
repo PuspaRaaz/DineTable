@@ -1,10 +1,10 @@
-#define DELETE "\033[A\033[2K" //character to delete one line from output
 #include "Basic.h"
 #include "Object.h"
 #include "Time.h"
 #include "Transformation.h"
 #include "Vertex.h"
 #include <SDL/SDL.h>
+#define DELETE "\033[A\033[2K" //character to delete one line from output
 
 int main(){
     int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600; //screeen parameters
@@ -19,8 +19,7 @@ int main(){
         while(SDL_PollEvent(&event)){ //executes if any external events occured
             if(event.type == SDL_QUIT) quit = true; //if user pressed ALT+F4 on keyboard or X in titlebar, program quits
             if(event.type == SDL_VIDEORESIZE){ //if user RESIZE the screen, screen parameters varies to the new measurements
-                SCREEN_WIDTH = event.resize.w;
-                SCREEN_HEIGHT = event.resize.h;
+                SCREEN_WIDTH = event.resize.w;  SCREEN_HEIGHT = event.resize.h;
             }
         }
         Uint8* keys = SDL_GetKeyState(0); //get keystate for all keyboard keys
@@ -38,10 +37,7 @@ int main(){
         if (keys[SDLK_z]) dineTable.rotate(RADIAN(0), RADIAN(0), RADIAN(1)); //rotation about z-axis in anti-clockwise direction
         // dineTable.draw(cam, viewPlane); //draws wireframe model of the object
         dineTable.triangleFill(SCREEN_WIDTH, SCREEN_HEIGHT, cam, viewPlane); //main draw function. implements triangle filling algorithm
-
-        // cam = (rotateZ(RADIAN(0)) * rotateY(RADIAN(0.1)) * rotateX(RADIAN(0))) * cam;
         // dineTable.rotate(RADIAN(1), RADIAN(1), RADIAN(1)); //automatic rotation about y-axis
-
         timer.stop(); //timer stops as processing ends
         uintmax_t samay = timer.time(); //get time difference
         float fps = 1e6 / samay; //get FPS from the time difference
