@@ -5,11 +5,12 @@
 
 #define ABS(a) ((a < 0) ? -a : a) //absolute value
 #define DEGREE(a) (a * 180 / PI) //equivalent angle in degree for its radian value
+#define DELETE "\033[A\033[2K" //character to delete one line from output
 #define EQUAL(a, b) ((bool)(ABS(a - b)) <= PRECISION) //return if a and b are equal or not
 #define MAX(a, b) (a > b ? a : b) //maximum of two numbers
 #define MIN(a, b) (a < b ? a : b) //minimum of two numbers
 #define PI 3.1415926 //value of pi
-#define PRECISION 0.00001 //precision required
+#define PRECISION 0.000001 //precision required
 #define RADIAN(a) (a * PI / 180) //equivalent radian value for provided degree angle
 #define ROUNDOFF(a) ((int)((a < 0) ? (a - 0.5) : (a + 0.5))) //gives the nearest integer value of float
 
@@ -28,7 +29,6 @@ public:
 	Color(float red, float green, float blue, float alpha = 0xff):
 		r(red), g(green), b(blue), a(alpha){}
 	~Color(){}
-	
 };
 
 //predifined colors with alpha -> 0xff

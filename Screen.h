@@ -85,7 +85,7 @@ void Screen::setPixel(int xx, int yy, float depth, Color c = White){
 	if (depth > zBuffer[xx * height + yy])
 		return;
 	zBuffer[xx * height + yy] = depth;
-    colour = SDL_MapRGB ( screen->format, c.r, c.g, c.b);
+    colour = SDL_MapRGB ( screen->format, 255*MIN(1,c.r), 255*MIN(1,c.g), 255*MIN(1,c.b));
     yy = yy*screen->pitch/4;
     pixmem32 = (int*) screen->pixels+yy+xx;
     *pixmem32 = colour;
