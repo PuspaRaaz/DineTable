@@ -38,12 +38,12 @@ private:
 public:
 	Object3D(const string&); //constructor, loads .obj file
 	void draw(Vertex3D&, Vertex3D&); //draw wireframe of the object loaded considering camera and lookAt position
+	bool isInsideTriangle(const Vertex3D&, const Vertex3D&, const Vertex3D&, const Vertex3D&);
 	void rotate(float, float, float); //rotates the object about origin in three direction, alpha -> X, beta -> Y & gamma -> Z axis
 	void scale(float); //scale the object about origin by the factor supplied
 	void sortVertices(Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&, Vertex3D&); //sort last three vertices in ascending order according to their y value and returns through the first three arguments
 	void translate(const Vertex3D&); //translate the object by the given 3D vertex
 	void triangleFill(int, int, Vertex3D&, Vertex3D&);
-	void drawHLine(float, float, float, Vertex3D&, float, Color);
 	~Object3D(){}
 };
 
@@ -87,13 +87,25 @@ void Object3D::draw(Vertex3D& cam, Vertex3D& viewPlane){
     DineTable.clear();    
 }
 
+bool Object3D::isInsideTriangle(const Vertex3D& p, const Vertex3D& a, const Vertex3D& b, const Vertex3D& c){
+	float x, y, z;
+	x = (p-a).x*(b-a).y - (p-a).y*(b-a).x;
+	y = (p-b).x*(c-b).y - (p-b).y*(c-b).x;
+	z = (p-c).x*(a-c).y - (p-c).y*(a-c).x;
+	return (x >= 0 && y >= 0 && z >= 0) || (x < 0 && y < 0 && z < 0);
+}
+
 void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlane){
 
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
+    DineTable.clear();
 
-    Color ia(0.1,0.1,0.1), ks(0.1, 0.1, 0.1), kd(0.5, 0.5, 0.5), ka(0.5, 0.5, 0.5);
-
+    Color ia(0.3,0.3,0.3), ks(0.1, 0.1, 0.1), kd(0.5, 0.5, 0.5), ka(0.5, 0.5, 0.5);
+	std::vector<LightSource> light;
+	light.push_back({{300, -300, 0},{1, 1, 1}});
+	//light.push_back({{0, -200, 0},{1, 0, 0}}); light.push_back({{500, 0, 0},{0, 1,0}}); light.push_back({{-500, 0, 0},{0,0,1}});
+	
     Color ColorIntensity[surfaceVertex.size()];
     for(unsigned int i = 0; i < surfaceVertex.size(); i++){
     	//get three vertices of the surface
@@ -101,14 +113,8 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 		Vertex3D b = vertexMatrix[ (unsigned int) surfaceVertex[i].y - 1 ];
 		Vertex3D c = vertexMatrix[ (unsigned int) surfaceVertex[i].z - 1 ];	
 
-		std::vector<LightSource> light;
-		LightSource redLight({{0, -200, 0},{1, 0, 0}}), greenLight({{300,0,0},{0, 1,0}}), blueLight({{-500, 0, 0},{0,0,1}});
-		light.push_back(redLight); light.push_back(blueLight); light.push_back(greenLight);
-		
 		Vertex3D n = (b-a).crossProduct(c-b)*-1;
 		Vertex3D centroid((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
-		
-		// if (n.z <= 0) continue;
 		
 		float intensityR = ia.r*ka.r, intensityG = ia.g*ka.g, intensityB = ia.b*ka.b;
 		for(int i = 0; i < light.size(); i++){
@@ -132,150 +138,11 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 	}
 
     float near = 5, far = 0xffffff;
-    Vertex3D v3[vertexMatrix.size()];
+    Vertex3D v3[vertexMatrix.size()], lightView[vertexMatrix.size()];
     for(int i = 0; i < vertexMatrix.size(); i++){
         v3[i] = perspective(vertexMatrix[i], cam, viewPlane, near, far, width, height); //conversion to device coordinate
     }
 
-/*
-
-
-
-    for (int i = 0; i < surfaceVertex.size(); i++){
-    	//get three vertices of the surface
-		Vertex3D a = v3[ (unsigned int) surfaceVertex[i].x - 1 ];
-		Vertex3D b = v3[ (unsigned int) surfaceVertex[i].y - 1 ];
-		Vertex3D c = v3[ (unsigned int) surfaceVertex[i].z - 1 ];
-
-		Vertex3D n = (b-a).crossProduct(c-b)*-1;
-		float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
-
-    	Vertex3D start, mid, end;
-    	sortVertices(start, mid, end, a, b, c);
-
-    	if (start.y >= height || end.y < 0) continue;
-    	if ( start.y >= end.y ) continue;
-
-
-		if( EQUAL(mid.y,start.y) )
-			continue;
-    	float slopeSM = (mid.x-start.x) / (mid.y-start.y);
-    	float cSM = start.y;
-    	if(!EQUAL(slopeSM,0))
-    		 cSM -= slopeSM*start.x/slopeSM;
-
-
-		if( EQUAL(end.y,start.y) )
-			continue;
-    	float slopeSE = (end.x-start.x) / (end.y-start.y);
-    	float cSE = start.y;
-    	if(!EQUAL(slopeSM,0))
-    		 cSE -= slopeSE*start.x/slopeSE;
-
-    	for (int y = start.y; y <= mid.y; y++){
-    		int xM = (y - cSM) * slopeSM;
-    		int xE = (y - cSE) * slopeSE;
-
-
-    		if (xM >= xE) SWAP(xM, xE);
-    		//std::cout << xM << " " << xE << std::endl;	
-
-    		xM = MAX(0, xM); xE = MIN(width, xE);
-    		
-    		while(xM <= xE){
-    			float depth = -(n.x*xM + n.y*y + d) / n.z;
-				DineTable.setPixel(xM, y, -depth, ColorIntensity[i]);
-    			xM++;
-    		}
-    	}
-
-
-		if( EQUAL(mid.y,end.y) )
-			continue;
-		if( EQUAL(mid.x,end.x) )
-			continue;
-    	slopeSM = (mid.y-end.y) / (mid.x-end.x);
-    	cSM = mid.y - slopeSM*mid.x;
-
-    	for (int y = mid.y; y <= end.y; y++){
-    		int xM = (y - cSM) / slopeSM;
-    		int xE = (y - cSE) * slopeSE;
-
-    		if (xM > xE) SWAP(xM, xE);
-    		
-    		//std::cout << xM << " " << xE << std::endl;	
-    		xM = MAX(0, xM); xE = MIN(width, xE);
-    		
-    		while(xM <= xE){
-    			float depth = -(n.x*xM + n.y*y + d) / n.z;
-				DineTable.setPixel(xM, y, -depth, ColorIntensity[i]);
-    			xM++;
-    		}
-    	}
-    }
-
-*/
-
-
-    for (int i = 0; i < surfaceVertex.size(); i++){
-        //get three vertices of the surface
-        Vertex3D a = v3[ (unsigned int) surfaceVertex[i].x - 1 ];
-        Vertex3D b = v3[ (unsigned int) surfaceVertex[i].y - 1 ];
-        Vertex3D c = v3[ (unsigned int) surfaceVertex[i].z - 1 ];
-
-
-        Vertex3D n = (b-a).crossProduct(c-b)*-1;
-        float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
-
-        Vertex3D start, mid, end;
-        sortVertices(start, mid, end, a, b, c);
-
-        if (start.y >= height || end.y < 0) continue;
-        if (start.y == end.y) continue;
-
-        float islopeSM = (mid.x-start.x) / (mid.y-start.y);
-        float islopeSE = (end.x-start.x) / (end.y-start.y) ;
-
-        float xM = start.x;
-        float xE = start.x;
-        for(int y = start.y; y < mid.y; y++){
-
-            int xxM = xM;
-            int xxE = xE;
-            if( xxM > xxE ) SWAP(xxM, xxE);
-            while (xxM <= xxE){
-                float depth = -(n.x*xxM + n.y*y + d) / n.z;
-                DineTable.setPixel( xxM, y, -depth, ColorIntensity[i]);
-                xxM++;
-            }
-
-            xM += islopeSM;
-            xE += islopeSE;
-        }
-
-        islopeSM = (mid.x-end.x) / (mid.y-end.y);
-
-        for(int y = mid.y; y <= end.y; y++){
-            int xxM = xM;
-            int xxE = xE;
-            if( xxM > xxE ) SWAP(xxM, xxE);
-            while (xxM <= xxE){
-                float depth = -(n.x*xxM + n.y*y + d) / n.z;
-                DineTable.setPixel( xxM, y, -depth, ColorIntensity[i]);
-                xxM++;
-            }
-            xM += islopeSM;
-            xE += islopeSE;
-        }
-
-    }
-
-
-
-
-
-
-/*
     for(unsigned int i = 0; i < surfaceVertex.size(); i++){
     	//get three vertices of the surface
 		Vertex3D a = v3[ (unsigned int) surfaceVertex[i].x - 1 ];
@@ -291,29 +158,21 @@ void Object3D::triangleFill(int width, int height, Vertex3D& cam, Vertex3D& view
 		Vertex3D n = (b-a).crossProduct(c-b)*-1;
 		float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
 		//normalize the surface
-		Vertex2D vs1(b.x - a.x, b.y - a.y), vs2(c.x - a.x, c.y - a.y);
-		float vs1Xvs2 = vs1.x*vs2.y - vs2.x*vs1.y; //gives the normal through cross product of AB and CA
 
-		for (int x = minX; x < maxX; x++){
-			for (int y = minY; y < maxY; y++){
-				Vertex2D q(x - a.x, y - a.y); //q = {point} - a
-				float s = (q.x*vs2.y - q.y*vs2.x) / vs1Xvs2; //q x vs2 / AB x CA
-				float t = (vs1.x*q.y - q.x*vs1.y) / vs1Xvs2; //vs1 x q / AB x CA
-
-				if((s)>=0 && (t) >=0 && (s+t) <= 1){ //check if the pixel is inside the triangle or not
+		for (int y = minY; y <= maxY; y++){
+			if (y < 0) continue;
+			if (y >= height) break;
+			for (int x =MAX(minX, 0); x <= maxX; x++){
+				if (x >= width) break;
+				if(isInsideTriangle(Vertex3D(x, y, 0), a, b, c)){
 					float depth = -(n.x*x + n.y*y + d) / n.z;
 					DineTable.setPixel(x, y, -depth, ColorIntensity[i]); //if inside, plot the pixel
 				}
 			}
 		}
 	}
-*/
 
-    DineTable.refresh();
-    DineTable.clear();
-}
-
-void Object3D::drawHLine(float xend, float xstart, float y, Vertex3D& normal, float d, Color colour){
+    DineTable.refresh(); 
 }
 
 void Object3D::translate(const Vertex3D& v){

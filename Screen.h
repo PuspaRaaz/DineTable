@@ -37,7 +37,7 @@ Screen::Screen(const int width, const int height){
 
 //clear the whole screen
 void Screen::clear(){
-	SDL_FillRect(screen, &screen->clip_rect, 0xFF0000);
+	SDL_FillRect(screen, &screen->clip_rect, 0xdadada);
 }
 
 //draw line from point A to B with color C using DDA line drawing algorithm
