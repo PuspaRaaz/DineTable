@@ -7,14 +7,13 @@
 
 int main(){
     int SCREEN_WIDTH = 800, SCREEN_HEIGHT = 600;
-    bool quit = false; bool gouraud = true;
+    bool quit = false; bool gouraud = 0;
     Vertex3D cam(0, 200, 320), viewPlane(0,0,0);
     Vertex3D camcopy = cam;
     Time timer;
     SDL_Event event;
     Object3D dineTable("/home/raazpuspa/Documents/Objects/DineT.obj");
     while(!quit){
-        timer.start();
         while(SDL_PollEvent(&event)){
             if(event.type == SDL_QUIT) quit = true;
             if(event.type == SDL_VIDEORESIZE){
@@ -27,11 +26,13 @@ int main(){
         if (keys[SDLK_UP]) cam.z--;
         if (keys[SDLK_DOWN]) cam.z++;
 
+        timer.start();
         if (gouraud)
             dineTable.gouraudFill(SCREEN_WIDTH, SCREEN_HEIGHT, cam, viewPlane);
         else
             dineTable.flatFill(SCREEN_WIDTH, SCREEN_HEIGHT, cam, viewPlane);
         timer.stop();
+
         uintmax_t samay = timer.time();
         float fps = 1e6 / samay;
         std::cout <<DELETE;

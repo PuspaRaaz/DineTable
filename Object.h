@@ -170,7 +170,11 @@ void Object3D::flatFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlan
 
     Color ia(0.3,0.3,0.3), ks(0.1, 0.1, 0.1), kd(0.5, 0.5, 0.5), ka(0.5, 0.5, 0.5);
 	std::vector<LightSource> light;
-	light.push_back({{0, -200, 200},{1, 0, 0}}); light.push_back({{500, 0, 200},{1, 0, 0}}); light.push_back({{-500, 0, 200},{1, 0, 0}});
+	light.push_back({{0, 200, 200},{1, 0, 0}});// light.push_back({{500, 0, 200},{1, 0, 0}}); light.push_back({{-500, 0, 200},{1, 0, 0}});
+
+	float shadowBuffer[width*height];
+	for (int i = 0; i < width*height; i++)
+		shadowBuffer[i] = 0xffffff;
 	
     Color ColorIntensity[surfaceVertex.size()];
     for(unsigned int i = 0; i < surfaceVertex.size(); i++){
@@ -179,12 +183,11 @@ void Object3D::flatFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlan
 		Vertex3D b = vertexMatrix[ (unsigned int) surfaceVertex[i].y - 1 ];
 		Vertex3D c = vertexMatrix[ (unsigned int) surfaceVertex[i].z - 1 ];	
 
-		Vertex3D n = (b-a).crossProduct(c-b)*-1;
+		Vertex3D n = (b-a).crossProduct(c-b);
 		Vertex3D centroid((a.x+b.x+c.x)/3, (a.y+b.y+c.y)/3, (a.z+b.z+c.z)/3);
 		
 		float intensityR = ia.r*ka.r, intensityG = ia.g*ka.g, intensityB = ia.b*ka.b;
 		for(int i = 0; i < light.size(); i++){
-
 			float costheta = (light[i].pos).cosine(n);
 			if(costheta > 0){
 				intensityR += light[i].Intensity.r*kd.r*costheta;
@@ -192,7 +195,7 @@ void Object3D::flatFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlan
 				intensityB += light[i].Intensity.b*kd.b*costheta;
 			}
 
-			Vertex3D R = n*(n.dotProduct(light[i].pos - centroid))*2/(n.magnitude() * (light[i].pos - centroid).magnitude()) - light[i].pos;
+			Vertex3D R = n*(n.dotProduct(light[i].pos - centroid))*2/(n.magnitude() * (light[i].pos*-1 - centroid).magnitude()) - light[i].pos*-1;
 			costheta = R.cosine(cam);
 			if(costheta > 0){
 				intensityR += light[i].Intensity.r*ks.r*pow(costheta, 2);
@@ -206,14 +209,15 @@ void Object3D::flatFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlan
     float near = 5, far = 0xffffff;
     Vertex3D v3[vertexMatrix.size()], lightView[vertexMatrix.size()];
     for(int i = 0; i < vertexMatrix.size(); i++){
-        v3[i] = perspective(vertexMatrix[i], cam, viewPlane, near, far, width, height); //conversion to device coordinate
+        v3[i] = perspective(vertexMatrix[i], cam, viewPlane, near, far, width, height);
+        lightView[i] = perspective(vertexMatrix[i], light[0].pos, viewPlane, near, far, width, height);
     }
 
-    for(unsigned int i = 0; i < surfaceVertex.size(); i++){
+    for (int i = 0; i < surfaceVertex.size(); i++){
     	//get three vertices of the surface
-		Vertex3D a = v3[ (unsigned int) surfaceVertex[i].x - 1 ];
-		Vertex3D b = v3[ (unsigned int) surfaceVertex[i].y - 1 ];
-		Vertex3D c = v3[ (unsigned int) surfaceVertex[i].z - 1 ];	
+		Vertex3D a = lightView[(unsigned int)surfaceVertex[i].x - 1];
+		Vertex3D b = lightView[(unsigned int)surfaceVertex[i].y - 1];
+		Vertex3D c = lightView[(unsigned int)surfaceVertex[i].z - 1];	
 
 		//get the smallest possible rectangle that bound the given triangle
 		int maxX = MAX(a.x, MAX(b.x, c.x));
@@ -230,8 +234,47 @@ void Object3D::flatFill(int width, int height, Vertex3D& cam, Vertex3D& viewPlan
 			for (int x =MAX(minX, 0); x <= maxX; x++){
 				if (x >= width) break;
 				if(isInsideTriangle(Vertex3D(x, y, 0), a, b, c)){
-					float depth = -(n.x*x + n.y*y + d) / n.z;
-					DineTable.setPixel(x, y, -depth, ColorIntensity[i]); //if inside, plot the pixel
+					float depth = (n.x*x + n.y*y + d) / n.z;
+					if (depth < shadowBuffer[x*height + y])
+						shadowBuffer[x*height + y] = depth;
+				}
+			}
+		}    	
+    }
+
+    for(unsigned int i = 0; i < surfaceVertex.size(); i++){
+    	//get three vertices of the surface
+		Vertex3D a = v3[(unsigned int)surfaceVertex[i].x - 1];
+		Vertex3D b = v3[(unsigned int)surfaceVertex[i].y - 1];
+		Vertex3D c = v3[(unsigned int)surfaceVertex[i].z - 1];
+		Vertex3D aLight = lightView[(unsigned int)surfaceVertex[i].x - 1];
+		Vertex3D bLight = lightView[(unsigned int)surfaceVertex[i].y - 1];
+		Vertex3D cLight = lightView[(unsigned int)surfaceVertex[i].z - 1];
+
+		Vertex3D n = (b-a).crossProduct(c-b)*-1;
+		float d = -(a.x*n.x + a.y*n.y + a.z*n.z);
+
+		Vertex3D nLight = (bLight - aLight).crossProduct(cLight - bLight)*-1;
+		float dLight = -(aLight.x*nLight.x + aLight.y*nLight.y + aLight.z*nLight.z);
+
+		//get the smallest possible rectangle that bound the given triangle
+		int maxX = MAX(a.x, MAX(b.x, c.x));
+		int minX = MIN(a.x, MIN(b.x, c.x));
+		int maxY = MAX(a.y, MAX(b.y, c.y));
+		int minY = MIN(a.y, MIN(b.y, c.y));
+
+		for (int y = minY; y <= maxY; y++){
+			if (y < 0) continue;
+			if (y >= height) break;
+			for (int x =MAX(minX, 0); x <= maxX; x++){
+				if (x >= width) break;
+				if(isInsideTriangle(Vertex3D(x, y, 0), a, b, c)){
+					float depthLight = (nLight.x*x + nLight.y*y + dLight) / nLight.z;
+					float depth = (n.x*x + n.y*y + d) / n.z;
+					// if(depthLight > shadowBuffer[x*height + y])
+					// 	DineTable.setPixel(x, y, depth, {0.2, 0.2, 0.8});
+					// else
+						DineTable.setPixel(x, y, depth, ColorIntensity[i]);
 				}
 			}
 		}
@@ -243,11 +286,11 @@ void Object3D::gouraudFill(int width, int height, Vertex3D& cam, Vertex3D& viewP
 
     SDL_WM_SetCaption("DineTable", NULL);
     Screen DineTable(width, height);
-    // DineTable.clear();
+    DineTable.clear();
 
     Color ia(0.3,0.3,0.3), ks(0.1, 0.1, 0.1), kd(0.5, 0.5, 0.5), ka(0.5, 0.5, 0.5);
 	std::vector<LightSource> light;
-	light.push_back({{0, 400, 400},{1, 0, 0}});// light.push_back({{500, 0, 200},{0, 1,0}}); light.push_back({{-500, 0, 200},{0,0,1}});
+	light.push_back({{0, 250, 400},{1, 0, 0}});
 	
     Color ColorIntensity[vertexMatrix.size()];
     for(unsigned int i = 0; i < vertexMatrix.size(); i++){
@@ -394,6 +437,7 @@ void Object3D::gouraudFill(int width, int height, Vertex3D& cam, Vertex3D& viewP
 				}else dr = dg = db = 0;
 
 				ColorVertex P = S;
+				// std::cout<<P.x<<"\t"<<S.x<<"\t"<<E.x<<"\n";
 				for(; P.x < E.x; P.x++){
 					float depth = -(n.x*P.x + n.y*P.y + d) / n.z;
 					DineTable.setPixel(P.x, P.y, -depth, P.col);
