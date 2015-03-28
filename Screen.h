@@ -18,6 +18,7 @@ public:
 	void setPixel(Vertex3D, Color);
 	void setPixel(int, int, float, Color);
 	void setPixel(int, int, int, Uint32);
+	void st_line(ColorVertex, ColorVertex);
 	~Screen(){ ////destructor
 		if(screen){
 			SDL_FreeSurface(screen);

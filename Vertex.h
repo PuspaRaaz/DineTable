@@ -4,16 +4,6 @@
 #include <cmath>
 #include "Basic.h"
 
-//2D vertex consisting only x and y
-class Vertex2D{
-public:
-	Vertex2D():x(0), y(0){}
-	Vertex2D(const Vertex2D& v):x(v.x),y(v.y){}
-	Vertex2D(int xx, int yy):x(xx), y(yy){}
-	float x, y;
-	~Vertex2D(){};
-};
-
 //3D vertex with z coordinate included
 class Vertex3D
 {
@@ -28,9 +18,22 @@ public:
 	float cosine(const Vertex3D&) const; //costheta between two vectors
 	float dotProduct (const Vertex3D) const; //a . b
 	float magnitude() const; //|a|
+	Vertex3D normalized();
+	void normalize();
 	float x, y, z;
 	~Vertex3D(){} //destructor
 };
+Vertex3D Vertex3D::normalized(){
+	float m = magnitude();
+	if (EQUAL(m, 0.0))
+		return {0, 0, 0};
+	return {x/m, y/m, z/m};
+}
+void Vertex3D::normalize(){
+	float M = magnitude();
+	if (!EQUAL(M, 0.0))
+		(*this) = (*this) / M;
+}
 Vertex3D Vertex3D::crossProduct (const Vertex3D vec) const{
 	return Vertex3D(y*vec.z - z*vec.y, z*vec.x - x*vec.z, x*vec.y - y*vec.x);
 }
@@ -62,6 +65,19 @@ public:
 	Vertex3D pos;
 	LightSource(Vertex3D v, Color c):pos(v), Intensity(c){}
 	~LightSource(){}
+};
+
+class ColorVertex
+{
+public:
+	float x, y, z;
+	Color col;
+	ColorVertex(){}
+	ColorVertex(const ColorVertex& c):x(c.x), y(c.y), z(c.z), col(c.col){}
+	ColorVertex(float a, float b, float d, Color c):x(a), y(b), z(d), col(c){}
+	ColorVertex(Vertex3D v, Color c):x(v.x), y(v.y), z(v.z), col(c){}
+	~ColorVertex(){}
+	
 };
 
 #endif
